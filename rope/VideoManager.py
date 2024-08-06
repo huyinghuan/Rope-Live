@@ -25,9 +25,6 @@ import pyvirtualcam
 import platform
 device = 'cuda'
 
-# cap = cv2.VideoCapture(0)
-# cap_virt = pyvirtualcam.Camera(width=1920, height=1080, fps=1)
-
 lock=threading.Lock()
 
 class VideoManager():  
@@ -152,7 +149,7 @@ class VideoManager():
         # print("Disable hello")
     def webcam_selected(self, file):
         return ('Webcam' in file) and len(file)==8
-    
+
     def change_webcam_resolution_and_fps(self):
         if self.video_file:
             if self.webcam_selected(self.video_file):
@@ -161,6 +158,7 @@ class VideoManager():
                     time.sleep(1)
                 self.load_target_video(self.video_file)
                 self.add_action('clear_faces_stop_swap', None)
+                self.add_action('clear_stop_enhance', None)
 
     def load_target_video( self, file ):
         # If we already have a video loaded, release it
@@ -171,7 +169,6 @@ class VideoManager():
             self.add_action("set_virtual_cam_toggle_disable",None)
             self.disable_virtualcam()
 
-            
         # Open file   
         self.video_file = file
         if self.webcam_selected(file):
@@ -194,7 +191,6 @@ class VideoManager():
             self.capture = cv2.VideoCapture(file)
             self.fps = self.capture.get(cv2.CAP_PROP_FPS)
 
-        
         if not self.capture.isOpened():
             if self.webcam_selected(file):
                 print("Cannot open file: ", file)
@@ -229,6 +225,7 @@ class VideoManager():
                 self.face_landmarks.remove_all_data()
                 self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
             #
+            self.add_action("clear_stop_enhance", None)
     
     def load_target_image(self, file):
         if self.capture:
@@ -248,6 +245,7 @@ class VideoManager():
             self.face_landmarks.remove_all_data()
             self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
         #
+        self.add_action("clear_stop_enhance", None)
 
         self.is_image_loaded = True
 
@@ -281,8 +279,7 @@ class VideoManager():
         return frame
     
     def get_requested_frame_length(self):
-        return len(self.r_frame_q)          
-    
+        return len(self.r_frame_q)
 
     def get_requested_video_frame(self, frame, marker=True):  
         temp = []
@@ -302,16 +299,18 @@ class VideoManager():
 
             if success:
                 # Face Landmarks
-                if apply_landmarks and self.face_landmarks:
+                if self.parameters['LandmarksPositionAdjSwitch'] and apply_landmarks and self.face_landmarks:
                     self.face_landmarks.apply_landmarks_to_widget_and_parameters(self.current_frame, 1)
-                #
-                
+
                 target_image = cv2.cvtColor(target_image, cv2.COLOR_BGR2RGB) #RGB 
-                if not self.control['SwapFacesButton']:   
+                if not self.control['SwapFacesButton']:
                     temp = [target_image, self.current_frame] #temp = RGB
                 else:
                     temp = [self.swap_video(target_image, self.current_frame, marker), self.current_frame] # temp = RGB
 
+                if self.control['EnhanceFrameButton']:
+                    temp[0] = self.enhance_video(temp[0], self.current_frame, marker) # temp = RGB
+                
                 self.r_frame_q.append(temp)
         elif self.is_image_loaded:
             if not self.control['SwapFacesButton']:
@@ -319,7 +318,10 @@ class VideoManager():
         
             else:  
                 temp = [self.swap_video(self.image, self.current_frame, False), self.current_frame] # image = RGB
-            
+
+            if self.control['EnhanceFrameButton']:
+                temp[0] = self.enhance_video(temp[0], self.current_frame, False) # image = RGB
+
             self.r_frame_q.append(temp)
 
     def find_lowest_frame(self, queues):
@@ -364,6 +366,7 @@ class VideoManager():
                         '-af', f'atempo={self.parameters["AudioSpeedSlider"]}',
                         self.video_file]
  
+                
                 self.audio_sp = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
                 # Parse the console to find where the audio started
@@ -379,6 +382,7 @@ class VideoManager():
                         except Exception as e:
                             print(e)
                         break
+
 
 #'    nan    :  0.000
 #'   1.25 M-A:  0.000 fd=   0 aq=   12KB vq=    0KB sq=    0B f=0/0' 
@@ -576,8 +580,8 @@ class VideoManager():
                         self.frame_timer = time.time()
         else:
             self.record=False  
-            self.add_action('disable_record_button', False)  
-     
+            self.add_action('disable_record_button', False)
+
     # @profile
     def thread_video_read(self, frame_number):  
         with lock:
@@ -590,7 +594,10 @@ class VideoManager():
             
             else:
                 temp = [self.swap_video(target_image, frame_number, True), frame_number]
-            
+
+            if self.control['EnhanceFrameButton']:
+                temp[0] = self.enhance_video(temp[0], frame_number, True)
+                    
             for item in self.process_qs:
                 if item['FrameNumber'] == frame_number:
                     item['ProcessedFrame'] = temp[0]
@@ -598,11 +605,100 @@ class VideoManager():
                     item['ThreadTime'] = time.time() - item['ThreadTime']
                     break
 
+    def enhance_video(self, target_image, frame_number, use_markers):
+        # Grab a local copy of the parameters to prevent threading issues
+        parameters = self.parameters.copy()
+        control = self.control.copy()
+        
+        # Find out if the frame is in a marker zone and copy the parameters if true
+        if self.markers and use_markers:
+            temp=[]
+            for i in range(len(self.markers)):
+                temp.append(self.markers[i]['frame'])
+            idx = bisect.bisect(temp, frame_number)
 
+            # We copy marker parameters only if condition matches.
+            if idx > 0:
+                parameters = self.markers[idx-1]['parameters'].copy()
+        
+        # Load frame into VRAM
+        img = torch.from_numpy(target_image.astype('uint8')).to('cuda') #HxWxc
+        img = img.permute(2,0,1)#cxHxW        
+
+        img = self.func_w_test("enhance_video", self.enhance_core, img, parameters)
+        
+        img = img.permute(1,2,0)
+        img = img.cpu().numpy()
+        
+        return img
+
+    def enhance_core(self, img, parameters):
+        enhancer_type = parameters['FrameEhnancerTypeTextSel']
+    
+        match enhancer_type:
+            case 'RealEsrgan-x2-Plus' | 'RealEsrgan-x4-Plus' | 'BSRGan-x2' | 'BSRGan-x4' | 'UltraSharp-x4' | 'UltraMix-x4':
+                tile_size = 512
+
+                if enhancer_type == 'RealEsrgan-x2-Plus' or enhancer_type == 'BSRGan-x2':
+                    scale = 2
+                else:
+                    scale = 4
+
+                img = img.type(torch.float32)
+                if torch.max(img) > 256:  # 16-bit image
+                    max_range = 65535
+                else:
+                    max_range = 255
+
+                img = torch.div(img, max_range)
+                img = torch.unsqueeze(img, 0).contiguous()
+
+                img = self.models.run_enhance_frame_tile_process(img, enhancer_type, tile_size=tile_size, scale=scale)
+
+                img = torch.squeeze(img)
+                img = torch.clamp(img, 0, 1)
+                img = torch.mul(img, max_range)
+
+                if max_range == 255:
+                    img = img.type(torch.uint8)
+                else:
+                    img = img.type(torch.uint16)
+
+            case 'DeOldify-Artistic' | 'DeOldify-Stable' | 'DeOldify-Video':
+                render_factor = 512 # 16 * 32 | highest quality = 20 * 32 == 640
+
+                channels, h, w = img.shape
+                t_resize_i = v2.Resize((render_factor, render_factor), interpolation=v2.InterpolationMode.BILINEAR, antialias=False)
+                image = t_resize_i(img)
+
+                image = image.type(torch.float32)
+                image = torch.unsqueeze(image, 0).contiguous()
+
+                output = torch.empty((image.shape), dtype=torch.float32, device='cuda').contiguous()
+
+                match enhancer_type:
+                    case 'DeOldify-Artistic':
+                        self.models.run_deoldify_artistic(image, output)
+                    case 'DeOldify-Stable':
+                        self.models.run_deoldify_stable(image, output)
+                    case 'DeOldify-Video':
+                        self.models.run_deoldify_video(image, output)
+
+                output = torch.squeeze(output).type(torch.uint8)
+                t_resize_o = v2.Resize((h, w), interpolation=v2.InterpolationMode.BILINEAR, antialias=False)
+                output = t_resize_o(output)
+
+                output = faceutil.rgb_to_yuv(output)
+                # do a black and white transform first to get better luminance values
+                hires = faceutil.rgb_to_yuv(img)
+
+                hires[1:3, :, :] = output[1:3, :, :]
+                img = faceutil.yuv_to_rgb(hires).type(torch.uint8)
+
+        return img
+    
     # @profile
     def swap_video(self, target_image, frame_number, use_markers):
-        # success, target_image = self.webcam.read()
-        # self.capture_frame()
         # Grab a local copy of the parameters to prevent threading issues
         parameters = self.parameters.copy()
         control = self.control.copy()
@@ -794,7 +890,7 @@ class VideoManager():
     def swap_core(self, img, kps, s_e, t_e, parameters, control): # img = RGB
         swapper_model = parameters['FaceSwapperModelTextSel']
 
-        if swapper_model != 'GF1' and swapper_model != 'GF2' and swapper_model != 'GF3':
+        if swapper_model != 'GhostFace-v1' and swapper_model != 'GhostFace-v2' and swapper_model != 'GhostFace-v3':
             # 512 transforms
             dst = self.arcface_dst * 4.0
             dst[:,0] += 32.0
@@ -869,7 +965,7 @@ class VideoManager():
 
             dim = 4
             input_face_affined = original_face_512
-        elif swapper_model == 'GF1' or swapper_model == 'GF2' or swapper_model == 'GF3':
+        elif swapper_model == 'GhostFace-v1' or swapper_model == 'GhostFace-v2' or swapper_model == 'GhostFace-v3':
             latent = torch.from_numpy(self.models.calc_swapper_latent_ghost(s_e)).float().to('cuda')
             if parameters['FaceLikenessSwitch']:
                 factor = parameters['FaceLikenessFactorSlider']
@@ -929,7 +1025,7 @@ class VideoManager():
                 output = torch.mul(output, 255)
                 output = torch.clamp(output, 0, 255)
 
-        elif swapper_model == 'GF1' or swapper_model == 'GF2' or swapper_model == 'GF3':
+        elif swapper_model == 'GhostFace-v1' or swapper_model == 'GhostFace-v2' or swapper_model == 'GhostFace-v3':
             for k in range(itex):
                 input_face_disc = torch.mul(input_face_affined, 255.0).permute(2, 0, 1)
                 input_face_disc = torch.div(input_face_disc.float(), 127.5)
@@ -1419,44 +1515,54 @@ class VideoManager():
         
         temp = torch.div(temp, 255)
         temp = v2.functional.normalize(temp, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=False)
-        if parameters['RestorerTypeTextSel'] == 'GP256':
+
+        if parameters['RestorerTypeTextSel'] == 'GPEN-256':
             temp = t256(temp)
+
         temp = torch.unsqueeze(temp, 0).contiguous()
 
         # Bindings
         outpred = torch.empty((1,3,512,512), dtype=torch.float32, device=device).contiguous()
 
-        if parameters['RestorerTypeTextSel'] == 'GFPGAN':
-            self.models.run_GFPGAN(temp, outpred)            
-            
-        elif parameters['RestorerTypeTextSel'] == 'CF':
-            self.models.run_codeformer(temp, outpred) 
-            
-        elif parameters['RestorerTypeTextSel'] == 'GP256':
-            outpred = torch.empty((1,3,256,256), dtype=torch.float32, device=device).contiguous()
-            self.models.run_GPEN_256(temp, outpred) 
-            
-        elif parameters['RestorerTypeTextSel'] == 'GP512':
-            self.models.run_GPEN_512(temp, outpred) 
+        if parameters['RestorerTypeTextSel'] == 'GFPGAN-v1.4':
+            self.models.run_GFPGAN(temp, outpred)
 
-        elif parameters['RestorerTypeTextSel'] == 'GP1024':
+        elif parameters['RestorerTypeTextSel'] == 'CodeFormer':
+            self.models.run_codeformer(temp, outpred)
+            
+        elif parameters['RestorerTypeTextSel'] == 'GPEN-256':
+            outpred = torch.empty((1,3,256,256), dtype=torch.float32, device=device).contiguous()
+            self.models.run_GPEN_256(temp, outpred)
+            
+        elif parameters['RestorerTypeTextSel'] == 'GPEN-512':
+            self.models.run_GPEN_512(temp, outpred)
+
+        elif parameters['RestorerTypeTextSel'] == 'GPEN-1024':
             temp = t1024(temp)
             outpred = torch.empty((1, 3, 1024, 1024), dtype=torch.float32, device=device).contiguous()
             self.models.run_GPEN_1024(temp, outpred)
 
-        elif parameters['RestorerTypeTextSel'] == 'GP2048':
+        elif parameters['RestorerTypeTextSel'] == 'GPEN-2048':
             temp = t2048(temp)
             outpred = torch.empty((1, 3, 2048, 2048), dtype=torch.float32, device=device).contiguous()
             self.models.run_GPEN_2048(temp, outpred)
 
+        elif parameters['RestorerTypeTextSel'] == 'RestoreFormer++':
+            self.models.run_RestoreFormerPlusPlus(temp, outpred)
+
+        elif parameters['RestorerTypeTextSel'] == 'VQFR-v2':
+            self.models.run_VQFR_v2(temp, outpred, parameters['VQFRFidelitySlider'])
+
         # Format back to cxHxW @ 255
-        outpred = torch.squeeze(outpred)      
+        outpred = torch.squeeze(outpred)
         outpred = torch.clamp(outpred, -1, 1)
         outpred = torch.add(outpred, 1)
         outpred = torch.div(outpred, 2)
         outpred = torch.mul(outpred, 255)
-        if parameters['RestorerTypeTextSel'] == 'GP256' or parameters['RestorerTypeTextSel'] == 'GP1024' or parameters['RestorerTypeTextSel'] == 'GP2048':
+
+        if parameters['RestorerTypeTextSel'] == 'GPEN-256' or parameters['RestorerTypeTextSel'] == 'GPEN-1024' or parameters['RestorerTypeTextSel'] == 'GPEN-2048':
             outpred = t512(outpred)
+
         # Invert Transform
         if parameters['RestorerDetTypeTextSel'] == 'Blend' or parameters['RestorerDetTypeTextSel'] == 'Reference':
             outpred = v2.functional.affine(outpred, tform.inverse.rotation*57.2958, (tform.inverse.translation[0], tform.inverse.translation[1]), tform.inverse.scale, 0, interpolation=v2.InterpolationMode.BILINEAR, center = (0,0) )

@@ -127,6 +127,10 @@ DEFAULT_DATA = {
 'SwapFacesInfoText':                'SWAP:\nSwap assigned Source Faces and Target Faces.',
 'SwapFacesState':                   False,          
 'SwapFacesText':                    'Swap Faces',  
+'EnhanceFrameDisplay':              'text', 
+'EnhanceFrameInfoText':             'Enhance:\nEnhance Frame.',
+'EnhanceFrameState':                False,          
+'EnhanceFrameText':                 'Enhance Frame',  
 'TLBeginningDisplay':              'icon', 
 'TLBeginningIconHover':            './rope/media/tl_beg_hover.png',
 'TLBeginningIconOff':              './rope/media/tl_beg_off.png',
@@ -222,13 +226,11 @@ DEFAULT_DATA = {
 'VirtualCameraSwitchState':         False,
 'VirtualCameraSwitchInfoText':      'VIRTUAL CAMERA:\nFeed the swapped video output to virtual camera for using in external applications',
 
-'VirtualCameraSwitchState':         False,
-'VirtualCameraSwitchInfoText':      'VIRTUAL CAMERA:\nFeed the swapped video output to virtual camera for using in external applications',
-
 'RestoreEyesSwitchInfoText':        'RESTORE EYES: \nRestore eyes from the original face',
 'RestoreEyesSwitchState':           False,
 'RestoreMouthSwitchInfoText':       'RESTORE MOUTH: \nRestore mouth from the original face',
 'RestoreMouthSwitchState':          False,
+
 # Sliders
 'BlendSliderAmount':                5,
 'BlendSliderInc':                   1,  
@@ -471,7 +473,6 @@ DEFAULT_DATA = {
 'RestoreMouthFeatherSliderMax':                  100,
 'RestoreMouthFeatherSliderMin':                  1,
 
-
 'OccluderSliderAmount':             0,
 'OccluderSliderInc':                1,
 'OccluderSliderInfoText':           'OCCLUDER AMOUNT:\nGrows or shrinks the occluded region',
@@ -519,11 +520,11 @@ DEFAULT_DATA = {
 'AudioSpeedSliderMax':              2.00,
 'AudioSpeedSliderMin':              0.50,
 
-'AudioSpeedSliderAmount':           1,
-'AudioSpeedSliderInc':              0.1,
-'AudioSpeedSliderInfoText':         'AUDIO PLAYBACK SPEED:\nAudo playback when "Enable Audio" is on',
-'AudioSpeedSliderMax':              2,
-'AudioSpeedSliderMin':              0.5,
+'VQFRFidelitySliderAmount':         0.0,
+'VQFRFidelitySliderInc':            0.1,
+'VQFRFidelitySliderInfoText':       'VQFR Fidelity Ratio:\nFidelity ratio value for VQFR v2 restorer.',
+'VQFRFidelitySliderMax':            1.0,
+'VQFRFidelitySliderMin':            0.0,
 
 'CLIPSliderAmount':                 50,
 'CLIPSliderInc':                    1,
@@ -589,7 +590,7 @@ DEFAULT_DATA = {
 # Face Swapper Model
 'FaceSwapperModelTextSelInfoText':  'Face Swapper Model:\nSelect the Face Swapper model.',
 'FaceSwapperModelTextSelMode':      'Inswapper128',
-'FaceSwapperModelTextSelModes':     ['Inswapper128', 'SimSwap512', 'GF1', 'GF2', 'GF3'],
+'FaceSwapperModelTextSelModes':     ['Inswapper128', 'SimSwap512', 'GhostFace-v1', 'GhostFace-v2', 'GhostFace-v3'],
 #
 'PreviewModeTextSelInfoText':       '',
 'PreviewModeTextSelMode':           'Video',
@@ -600,9 +601,15 @@ DEFAULT_DATA = {
 'RestorerDetTypeTextSelInfoText':   'ALIGNMENT:\nSelect how the face is aligned for the Restorer. Original preserves facial features and expressions, but can show some artifacts. Reference softens features. Blend is closer to Reference but is much faster.',
 'RestorerDetTypeTextSelMode':       'Blend',
 'RestorerDetTypeTextSelModes':      ['Original', 'Blend', 'Reference'],  
-'RestorerTypeTextSelInfoText':      'RESTORER TYPE:\nSelect the Restorer type.\nSpeed: GPEN256>GFPGAN>CF>GPEN512>GPEN1024>GPEN2028',
-'RestorerTypeTextSelMode':          'GFPGAN',
-'RestorerTypeTextSelModes':         ['GFPGAN', 'CF', 'GP256', 'GP512', 'GP1024', 'GP2048'],
+'RestorerTypeTextSelInfoText':      'RESTORER TYPE:\nSelect the Restorer type.\nSpeed: GPEN 256>GFPGAN v1.4>CodeFormer>GPEN 512>GPEN 1024>GPEN 2048>VQFR v2',
+'RestorerTypeTextSelMode':          'GFPGAN-v1.4',
+'RestorerTypeTextSelModes':         ['GFPGAN-v1.4', 'CodeFormer', 'GPEN-256', 'GPEN-512', 'GPEN-1024', 'GPEN-2048', 'RestoreFormer++', 'VQFR-v2'],
+
+# Frame Enhancer
+'FrameEhnancerTypeTextSelInfoText': 'FRAME EHNANCER TYPE:\nSelect the Restorer type.\nSpeed: DeOldify Artistic>DeOldify Stable>DeOldify Video>RealEsrgan x2 plus>BSRGan x2>UltraMix x4>UltraSharp x4>RealEsrgan x4 plus>BSRGan x4',
+'FrameEhnancerTypeTextSelMode':     'RealEsrgan-x2-Plus',
+'FrameEhnancerTypeTextSelModes':    ['RealEsrgan-x2-Plus', 'RealEsrgan-x4-Plus', 'BSRGan-x2', 'BSRGan-x4', 'UltraSharp-x4', 'UltraMix-x4', 'DeOldify-Artistic', 'DeOldify-Stable', 'DeOldify-Video'],
+#
 
 'WebCamMaxResolSelInfoText':        "WEBCAM MAX RESOLUTION:\nSelect the maximum resolution to be used by the webcam",
 'WebCamMaxResolSelMode':            '1920x1080',

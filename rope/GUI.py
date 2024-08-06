@@ -673,7 +673,7 @@ class GUI(tk.Tk):
         # Slider
         self.layer['slider_frame'] = tk.Frame(self.layer['preview_column'], style.canvas_frame_label_2, height=20)
         self.layer['slider_frame'].grid(row=2, column=0, sticky='NEWS', pady=0)
-        self.video_slider = GE.Timeline(self.layer['slider_frame'], self.widget, self.temp_toggle_swapper, self.add_action)
+        self.video_slider = GE.Timeline(self.layer['slider_frame'], self.widget, self.temp_toggle_swapper, self.temp_toggle_enhancer, self.add_action)
 
         # Markers
         self.layer['markers_canvas'] = tk.Canvas(self.layer['preview_column'], style.canvas_frame_label_2, height = 20)
@@ -753,12 +753,13 @@ class GUI(tk.Tk):
         ff_frame.grid_rowconfigure(0, weight=0)
 
         # Buttons
-        button_frame = tk.Frame(ff_frame, style.canvas_frame_label_2, height = 100, width = 112)
+        button_frame = tk.Frame(ff_frame, style.canvas_frame_label_2, height = 133, width = 112)
         button_frame.grid( row = 0, column = 0, )
 
         self.widget['FindFacesButton'] = GE.Button(button_frame, 'FindFaces', 2, self.find_faces, None, 'control', x=0, y=0, width=112, height=33)
         self.widget['ClearFacesButton'] = GE.Button(button_frame, 'ClearFaces', 2, self.clear_faces, None, 'control', x=0, y=33, width=112, height=33)
         self.widget['SwapFacesButton'] = GE.Button(button_frame, 'SwapFaces', 2, self.toggle_swapper, None, 'control', x=0, y=66, width=112, height=33)
+        self.widget['EnhanceFrameButton'] = GE.Button(button_frame, 'EnhanceFrame', 2, self.toggle_enhancer, None, 'control', x=0, y=99, width=112, height=33)
 
         # Scroll Canvas
         self.found_faces_canvas = tk.Canvas(ff_frame, style.canvas_frame_label_3, height = 100 )
@@ -835,7 +836,7 @@ class GUI(tk.Tk):
         self.layer['parameters_canvas'] = tk.Canvas(self.layer['parameter_frame'], style.canvas_frame_label_3, bd=0, width=width)
         self.layer['parameters_canvas'].grid(row=1, column=0, sticky='NEWS', pady=0, padx=0)
 
-        self.layer['parameters_frame'] = tk.Frame(self.layer['parameters_canvas'], style.canvas_frame_label_3, bd=0, width=width, height=1955)
+        self.layer['parameters_frame'] = tk.Frame(self.layer['parameters_canvas'], style.canvas_frame_label_3, bd=0, width=width, height=2030)
         self.layer['parameters_frame'].grid(row=0, column=0, sticky='NEWS', pady=0, padx=0)
 
         self.layer['parameters_canvas'].create_window(0, 0, window = self.layer['parameters_frame'], anchor='nw')
@@ -859,48 +860,56 @@ class GUI(tk.Tk):
         # Providers Priority
         self.widget['ProvidersPriorityTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'ProvidersPriorityTextSel', 'Providers Priority', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
         row += row_delta
+        self.widget['ThreadsSlider'] = GE.Slider2(self.layer['parameters_frame'], 'ThreadsSlider', 'Threads', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.72)
+        row += top_border_delta
+        self.static_widget['9'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
         #
         # Face Swapper Model
-        self.widget['FaceSwapperModelTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'FaceSwapperModelTextSel', 'Face Swapper Model', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
+        self.widget['FaceSwapperModelTextSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'FaceSwapperModelTextSel', 'Face Swapper Model', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72, 150)
+        row += row_delta
+        self.widget['SwapperTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'SwapperTypeTextSel', 'Swapper Resolution', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
         row += top_border_delta
         self.static_widget['9'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
         #
 
         #Webcam Max Resolution
-        self.widget['WebCamMaxResolSel'] = GE.TextSelection(self.layer['parameters_frame'], 'WebCamMaxResolSel', 'Webcam Resolution', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
+        self.widget['WebCamMaxResolSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'WebCamMaxResolSel', 'Webcam Resolution', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72, 150)
         row += row_delta
 
-       #Webcam Max FPS
+        #Webcam Max FPS
         self.widget['WebCamMaxFPSSel'] = GE.TextSelection(self.layer['parameters_frame'], 'WebCamMaxFPSSel', 'Webcam FPS', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
         row += row_delta
 
         #Webcam Max Count
         self.widget['WebCamMaxNoSlider'] = GE.Slider2(self.layer['parameters_frame'], 'WebCamMaxNoSlider', 'Max Webcams', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.72)
         row += row_delta
-        # self.widget['WebCamMaxNoSel'] = GE.TextSelection(self.layer['parameters_frame'], 'WebCamMaxNoSel', 'Max Webcams', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
-        # row += row_delta
 
         #Virtual Cam
         self.widget['VirtualCameraSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'VirtualCameraSwitch', 'Send Frames to Virtual Camera', 3, self.toggle_virtualcam, 'control', 398, 20, 1, row)
-        row += row_delta
+        row += top_border_delta
+        self.static_widget['9'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
 
         # Restore
         self.widget['RestorerSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'RestorerSwitch', 'Restorer', 3, self.update_data, 'parameter', 398, 20, 1, row)
         row += switch_delta
-        self.widget['RestorerTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'RestorerTypeTextSel', 'Restorer Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
+        self.widget['RestorerTypeTextSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'RestorerTypeTextSel', 'Restorer Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72, 150)
         row += row_delta
         self.widget['RestorerDetTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'RestorerDetTypeTextSel', 'Detection Alignment', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72)
+        row += row_delta
+        self.widget['VQFRFidelitySlider'] = GE.Slider2(self.layer['parameters_frame'], 'VQFRFidelitySlider', 'Fidelity Ratio', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.72)
         row += row_delta
         self.widget['RestorerSlider'] = GE.Slider2(self.layer['parameters_frame'], 'RestorerSlider', 'Blend', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.72)
         row += top_border_delta
         self.static_widget['9'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
 
-        # Threshhold
-        self.widget['ThresholdSlider'] = GE.Slider2(self.layer['parameters_frame'], 'ThresholdSlider', 'Similarity Threshhold', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        # Frame Restorer
+        self.widget['FrameEhnancerTypeTextSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'FrameEhnancerTypeTextSel', 'Enhancer Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.72, 150)
         row += top_border_delta
-        self.static_widget['3'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        self.static_widget['9'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
 
         # Orientation
@@ -941,6 +950,12 @@ class GUI(tk.Tk):
         self.static_widget['8'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
 
+        # Blur
+        self.widget['BlendSlider'] = GE.Slider2(self.layer['parameters_frame'], 'BlendSlider', 'Overall Mask Blend', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        row += top_border_delta
+        self.static_widget['13'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
+
         # Occluder
         self.widget['OccluderSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'OccluderSwitch', 'Occluder', 3, self.update_data, 'parameter', 398, 20, 1, row)
         row += switch_delta
@@ -955,6 +970,16 @@ class GUI(tk.Tk):
         self.widget['DFLXSegSlider'] = GE.Slider2(self.layer['parameters_frame'], 'DFLXSegSlider', 'Size', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
         row += top_border_delta
         self.static_widget['10'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
+
+        # CLIP
+        self.widget['CLIPSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'CLIPSwitch', 'Text-Based Masking', 3, self.update_data, 'parameter', 398, 20, 1, row)
+        row += switch_delta
+        self.widget['CLIPTextEntry'] = GE.Text_Entry(self.layer['parameters_frame'], 'CLIPTextEntry', 'Text-Based Masking', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        row += row_delta
+        self.widget['CLIPSlider'] = GE.Slider2(self.layer['parameters_frame'], 'CLIPSlider', 'Amount', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        row += top_border_delta
+        self.static_widget['12'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
 
         #Restore Eyes
@@ -977,7 +1002,6 @@ class GUI(tk.Tk):
         row += switch_delta        
         self.widget['RestoreMouthSizeSlider'] = GE.Slider2(self.layer['parameters_frame'], 'RestoreMouthSizeSlider', 'Mouth Size', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
         row += switch_delta 
-
 
         # FaceParser - Face
         self.widget['FaceParserSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'FaceParserSwitch', 'Face Parser', 3, self.update_data, 'parameter', 398, 20, 1, row)
@@ -1010,22 +1034,6 @@ class GUI(tk.Tk):
         row += top_border_delta
         
         self.static_widget['12'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
-        row += bottom_border_delta
-
-        # CLIP
-        self.widget['CLIPSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'CLIPSwitch', 'Text-Based Masking', 3, self.update_data, 'parameter', 398, 20, 1, row)
-        row += switch_delta
-        self.widget['CLIPTextEntry'] = GE.Text_Entry(self.layer['parameters_frame'], 'CLIPTextEntry', 'Text-Based Masking', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
-        row += row_delta
-        self.widget['CLIPSlider'] = GE.Slider2(self.layer['parameters_frame'], 'CLIPSlider', 'Amount', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
-        row += top_border_delta
-        self.static_widget['12'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
-        row += bottom_border_delta
-
-        # Blur
-        self.widget['BlendSlider'] = GE.Slider2(self.layer['parameters_frame'], 'BlendSlider', 'Overall Mask Blend', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
-        row += top_border_delta
-        self.static_widget['13'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
 
         # Color Adjustments
@@ -1065,12 +1073,21 @@ class GUI(tk.Tk):
         row += top_border_delta
         self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
-
-        # Cats and Dogs
-        self.widget['ThreadsSlider'] = GE.Slider2(self.layer['parameters_frame'], 'ThreadsSlider', 'Threads', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
-
+        # Face Likeness
+        self.widget['FaceLikenessSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'FaceLikenessSwitch', 'Face Likeness', 3, self.update_data, 'parameter', 398, 20, 1, row)
         row += row_delta
-        self.widget['DetectTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'DetectTypeTextSel', 'Detection Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62)
+        self.widget['FaceLikenessFactorSlider'] = GE.Slider2(self.layer['parameters_frame'], 'FaceLikenessFactorSlider', 'Factor', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        row += top_border_delta
+        self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
+        #
+        # Threshhold
+        self.widget['ThresholdSlider'] = GE.Slider2(self.layer['parameters_frame'], 'ThresholdSlider', 'Similarity Threshhold', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
+        row += top_border_delta
+        self.static_widget['3'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
+        row += bottom_border_delta
+        # Cats and Dogs
+        self.widget['DetectTypeTextSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'DetectTypeTextSel', 'Detection Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62, 150)
         row += row_delta
         self.widget['DetectScoreSlider'] = GE.Slider2(self.layer['parameters_frame'], 'DetectScoreSlider', 'Detect Score', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
         # Similarity
@@ -1080,22 +1097,16 @@ class GUI(tk.Tk):
         # Auto Rotation
         row += switch_delta
         self.widget['AutoRotationSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'AutoRotationSwitch', 'Auto Rotation', 3, self.update_data, 'parameter', 398, 20, 1, row)
-        #
-        # Face Likeness
-        row += switch_delta
-        self.widget['FaceLikenessSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'FaceLikenessSwitch', 'Face Likeness', 3, self.update_data, 'parameter', 398, 20, 1, row)
-        row += row_delta
-        self.widget['FaceLikenessFactorSlider'] = GE.Slider2(self.layer['parameters_frame'], 'FaceLikenessFactorSlider', 'Factor', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
-        #
-        # Landmarks Detection
         row += top_border_delta
         self.static_widget['4'] = GE.Separator_x(self.layer['parameters_frame'], 0, row)
         row += bottom_border_delta
+        #
+        # Landmarks Detection
         self.widget['LandmarksDetectionAdjSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'LandmarksDetectionAdjSwitch', 'Landmarks Detection Adjustments', 3, self.update_data, 'parameter', 398, 20, 1, row)
         row += switch_delta
         self.widget['LandmarksAlignModeFromPointsSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'LandmarksAlignModeFromPointsSwitch', 'From Points', 3, self.update_data, 'parameter', 398, 20, 1, row, 30, 40)
         row += switch_delta
-        self.widget['LandmarksDetectTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'LandmarksDetectTypeTextSel', 'Landmarks Detection Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62)
+        self.widget['LandmarksDetectTypeTextSel'] = GE.TextSelectionComboBox(self.layer['parameters_frame'], 'LandmarksDetectTypeTextSel', 'Landmarks Detection Type', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62, 150)
         row += row_delta
         self.widget['LandmarksDetectScoreSlider'] = GE.Slider2(self.layer['parameters_frame'], 'LandmarksDetectScoreSlider', 'Landmarks Detect Score', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
         row += row_delta
@@ -1135,8 +1146,6 @@ class GUI(tk.Tk):
         self.widget['AudioSpeedSlider'] = GE.Slider2(self.layer['parameters_frame'], 'AudioSpeedSlider', 'Audio Playback Speed', 3, self.update_data, 'parameter', 398, 20, 1, row, 0.62)
         row += row_delta
         self.widget['MergeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'MergeTextSel', 'Merge Math', 3, self.select_input_faces, 'merge', '', 398, 20, 1, row, 0.62)
-        row += row_delta
-        self.widget['SwapperTypeTextSel'] = GE.TextSelection(self.layer['parameters_frame'], 'SwapperTypeTextSel', 'Swapper Resolution', 3, self.update_data, 'parameter', 'parameter', 398, 20, 1, row, 0.62)
 
     ### Other
         self.layer['tooltip_frame'] = tk.Frame(self.layer['parameter_frame'], style.canvas_frame_label_3, height=80)
@@ -1999,7 +2008,7 @@ class GUI(tk.Tk):
         self.widget['AutoSwapButton'].toggle_button()
 
 
-    def load_target(self, button, media_file, media_type,):
+    def load_target(self, button, media_file, media_type):
         # Make sure the video stops playing
         self.toggle_play_video('stop')
         self.image_loaded = False
@@ -2204,10 +2213,6 @@ class GUI(tk.Tk):
         self.widget['VirtualCameraSwitch'].toggle_switch(False)
 
 
-    def set_virtual_cam_toggle_disable(self):
-        self.widget['VirtualCameraSwitch'].toggle_switch(False)
-
-
     def toggle_swapper(self, toggle_value=-1):
         # print(inspect.currentframe().f_back.f_code.co_name, 'toggle_swapper: '+'toggle_value='+str(toggle_value))
 
@@ -2235,6 +2240,32 @@ class GUI(tk.Tk):
             self.widget['SwapFacesButton'].temp_enable_button()
 
         self.update_data('control', 'SwapFacesButton', use_markers=True)
+
+    def toggle_enhancer(self, toggle_value=-1):
+        if toggle_value == -1:
+            self.widget['EnhanceFrameButton'].toggle_button()
+
+        else:
+            if toggle_value:
+                self.widget['EnhanceFrameButton'].enable_button()
+            else:
+                self.widget['EnhanceFrameButton'].disable_button()
+
+        if self.widget['PreviewModeTextSel'].get()=='Video' or self.widget['PreviewModeTextSel'].get()=='Theater':
+            self.update_data('control', 'EnhanceFrameButton', use_markers=True)
+        elif self.widget['PreviewModeTextSel'].get()=='Image':
+            self.update_data('control', 'EnhanceFrameButton', use_markers=False)
+        elif self.widget['PreviewModeTextSel'].get() == 'FaceLab':
+            self.update_data('control', 'EnhanceFrameButton', use_markers=False)
+
+
+    def temp_toggle_enhancer(self, state):
+        if state=='off':
+            self.widget['EnhanceFrameButton'].temp_disable_button()
+        elif state=='on':
+            self.widget['EnhanceFrameButton'].temp_enable_button()
+
+        self.update_data('control', 'EnhanceFrameButton', use_markers=True)
 
     def toggle_rec_video(self):
         # Play button must be off to enable record button
@@ -2568,7 +2599,8 @@ class GUI(tk.Tk):
         self.widget['OccluderSwitch'].set(False)
         self.widget['FaceParserSwitch'].set(False)
         self.widget['CLIPSwitch'].set(False)
-        self.widget['SwapFacesButton'].set(False)
+        self.toggle_swapper(False)
+        self.toggle_enhancer(False)
 
         self.models.delete_models()
         torch.cuda.empty_cache()
@@ -2604,11 +2636,9 @@ class GUI(tk.Tk):
             self.add_action('stop_ffplay', None)
         else:
             self.add_action('play_video', 'stop_from_gui')
-
         self.widget['AudioButton'].toggle_button()
         self.control['AudioButton'] = self.widget['AudioButton'].get()        
         self.add_action('control', self.control)
-
         if self.widget['TLPlayButton'].get():
             self.add_action('play_video', 'play')
         
@@ -2619,16 +2649,23 @@ class GUI(tk.Tk):
         self.add_action('get_requested_video_frame', self.video_slider.get())
         
     def parameter_io(self, task):
+        initial_dir = os.getcwd()  # Get the current working directory
+        
         if task=='save':
-            with open("saved_parameters.json", "w") as save_file:
+            save_file = filedialog.asksaveasfile(mode='w', initialdir=initial_dir,  defaultextension=".json", filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
+            if save_file:
                 json.dump(self.parameters, save_file)
+                save_file.close()
 
         elif task=='load':
             try:
-                load_file = open("saved_parameters.json", "r")
+                load_file = filedialog.askopenfile(mode='r', initialdir=initial_dir, filetypes=[("JSON files", "*.json"), ("All files", "*.*")])
             except FileNotFoundError:
                 print('No save file created yet!')
-            else: 
+            else:
+                if not load_file:
+                    return
+
                 # Load the file and save it to parameters
                 self.parameters = json.load(load_file)
                 load_file.close()
@@ -2662,7 +2699,7 @@ class GUI(tk.Tk):
         print(np.dot(vector1, vector2))
 
         return cos_dist
-    
+
     def toggle_virtualcam(self, mode, name, use_markers=False):
         self.control[name] =  self.widget[name].get()
         self.add_action('control', self.control)
@@ -2673,9 +2710,4 @@ class GUI(tk.Tk):
 
     def disable_record_button(self):
         self.widget['TLRecButton'].disable_button()
-
-    # def change_webcam_resolution_and_fps(self, mode, name, use_markers=False):
-    #     self.parameters[name] = self.widget[name].get()
-    #     self.add_action('parameters', self.parameters)
-    #     self.add_action('change_webcam_resolution_and_fps')
 

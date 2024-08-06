@@ -46,9 +46,10 @@ arcface_src = np.expand_dims(arcface_src, axis=0)
 def pad_image_by_size(img, image_size):
     w, h = math.ceil(img.size(dim=2)), math.ceil(img.size(dim=1))
     if w < image_size or h < image_size:
+        pad_right = image_size - w
+        pad_bottom = image_size - h
         # add right, bottom pading to the image if its size is less than image_size value
-        add = image_size - min(w, h)
-        img = torch.nn.functional.pad(img, (0, add, 0, add), 'constant', 0)
+        img = torch.nn.functional.pad(img, (0, pad_right, 0, pad_bottom), 'constant', 0)
 
     return img
 
@@ -622,3 +623,46 @@ def get_face_orientation(face_size, lmk):
     angle_deg_to_front = np.rad2deg(tform.rotation)
 
     return angle_deg_to_front
+
+
+def rgb_to_yuv(image):
+    """
+    Convert an RGB image to YUV.
+    Args:
+        image (torch.Tensor): The input image tensor in RGB format (C, H, W) with values in the range [0, 255].
+    Returns:
+        torch.Tensor: The image tensor in YUV format (C, H, W).
+    """
+    # Ensure the image is in the range [0, 1]
+    image = torch.div(image, 255.0)
+
+    # Define the conversion matrix from RGB to YUV
+    conversion_matrix = torch.tensor([[0.299, 0.587, 0.114],
+                                      [-0.14713, -0.28886, 0.436],
+                                      [0.615, -0.51499, -0.10001]], device=image.device, dtype=image.dtype)
+    
+    # Apply the conversion matrix
+    yuv_image = torch.tensordot(image.permute(1, 2, 0), conversion_matrix, dims=1).permute(2, 0, 1)
+    
+    return yuv_image
+
+def yuv_to_rgb(image):
+    """
+    Convert a YUV image to RGB.
+    Args:
+        image (torch.Tensor): The input image tensor in YUV format (C, H, W) with values in the range [0, 1].
+    Returns:
+        torch.Tensor: The image tensor in RGB format (C, H, W).
+    """
+    # Define the conversion matrix from YUV to RGB
+    conversion_matrix = torch.tensor([[1, 0, 1.13983],
+                                      [1, -0.39465, -0.58060],
+                                      [1, 2.03211, 0]], device=image.device, dtype=image.dtype)
+    
+    # Apply the conversion matrix
+    rgb_image = torch.tensordot(image.permute(1, 2, 0), conversion_matrix, dims=1).permute(2, 0, 1)
+    
+    # Ensure the image is in the range [0, 1]
+    rgb_image = torch.clamp(rgb_image, 0, 1)
+    
+    return torch.mul(rgb_image, 255.0)
