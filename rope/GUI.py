@@ -1,4 +1,5 @@
 import os
+import traceback
 import cv2
 import tkinter as tk
 from tkinter import filedialog, font
@@ -23,6 +24,7 @@ import rope.Styles as style
 
 from skimage import transform as trans
 from torchvision.transforms import v2
+from tkinter import messagebox
 
 import inspect #print(inspect.currentframe().f_back.f_code.co_name, 'resize_image')
 from platform import system
@@ -293,6 +295,19 @@ class GUI(tk.Tk):
 
         # self.bind("<Return>", lambda event: self.focus_set())
 
+    def report_callback_exception(self, exc_type, exc_value, exc_traceback):
+        super().report_callback_exception(exc_type, exc_value, exc_traceback)
+        filename, line, *_ = traceback.extract_tb(exc_traceback).pop()
+        messagebox.showerror(
+            "Application Error",
+            f"An unexpected error has occurred:\n\n"
+            f"Type: {exc_type.__name__}\n"
+            f"Message: {exc_value}\n"
+            f"File: {filename}\n"
+            f"Line Number: {line}\n\n"
+            "Please contact support or try restarting the application."
+        )
+        self.quit()
 
 #####
     def create_gui(self):

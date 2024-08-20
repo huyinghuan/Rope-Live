@@ -7,7 +7,7 @@
 *.engine
 *.profile
 *.timing
-saved_parameters.json
+saved_parameters*.json
 data.json
 merged_embeddings*.txt
 .vs
@@ -17,5 +17,5 @@ merged_embeddings*.txt
 tensorrt-engines/
 source_videos/
 source_images/
-TensorRT*/
+dependencies/
 Rope_TensorRT*.bat
