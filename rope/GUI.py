@@ -1566,6 +1566,7 @@ class GUI(tk.Tk):
 
     def load_all(self):
         if not self.json_dict["source videos"] or not self.json_dict["source faces"]:
+            messagebox.showinfo('Set Faces folder',f'Please set faces and videos folders first!',)
             print("Please set faces and videos folders first!")
             return
 
@@ -1743,6 +1744,7 @@ class GUI(tk.Tk):
                 ret.append([face_kps, face_emb, cropped_img])
 
         except Exception:
+            messagebox.showinfo('No Media', 'No media selected')
             print(" No media selected")
 
         else:
@@ -2205,6 +2207,7 @@ class GUI(tk.Tk):
                     # and record
                     if self.widget['TLRecButton'].get():
                         if not self.json_dict["saved videos"]:
+                            messagebox.showinfo('Set saved videos folder','PLease set a folder to save videos before starting to record ')
                             print("Set saved video folder first!")
                             self.add_action("play_video", "stop_from_gui")
 

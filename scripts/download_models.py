@@ -11,7 +11,8 @@ def download_file(url):
 
     if Path(filename).is_file():
         print(f"Skipping {filename} as it is already downloaded ")
-    else:        
+    else:   
+        print(f"{filename}")     
         response = requests.get(url, stream=True)
 
         # Sizes in bytes.
