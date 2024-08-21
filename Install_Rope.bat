@@ -10,3 +10,5 @@ echo.
 echo --------Installation Complete--------
 echo.
 echo You can now start the program by running the Start_Rope.bat file
+
+pause
