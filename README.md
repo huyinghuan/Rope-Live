@@ -14,20 +14,34 @@ For a full list of features and details, please visit the original project [page
 ## Requirements
   * Windows 10 or 11
   * Nvidia GPU with CUDA Support
-  * [Git for Windows](https://git-scm.com/download/win)
-  * [Miniconda](https://docs.anaconda.com/miniconda/)
   * [OBS Studio](https://obsproject.com/)
-  * [FFMPEG](https://www.ffmpeg.org/download.html)
 
 ## Screenshots
 
 ![](https://i.ibb.co/fCLSjt0/Screenshot-609.png)
 
-
-## Installation
+## Installation:
 
 **Disclaimer**:
 This repository is only intended for use on Windows (with Nvidia CUDA).
+
+### Method 1: Using the Installer
+
+1. Go to the [releases](https://github.com/argenspin/Rope-Live/releases/tag/1.0.0) page and download all the parts (_.bin files_) and the _Rope-Live Setup.exe_ for installation
+2. Run the _Rope-Live Setup.exe_, choose a location to install on (Don't use the _Program Files_ folder or the root of the _C:_ drive) and complete the installation
+3. Set up OBS Virtual Camera
+   - Install and Start OBS Studio.
+   - Click "Start Virtual Camera" (bottom right), then "Stop Virtual Camera".
+   - Close OBS.
+4. Start using the application by running the _Start_Rope.bat_ file from the installed directory
+
+### Method 2: Using Conda
+
+#### Requirements
+  * [Git for Windows](https://git-scm.com/download/win)
+  * [Miniconda](https://docs.anaconda.com/miniconda/)
+  * [FFMPEG](https://www.ffmpeg.org/download.html)
+
 
 1. Open a folder in file explorer to install Rope in. Once you're in that folder, you can right-click it and select, 'Open in Terminal'
 
@@ -67,7 +81,7 @@ python -m pip install -r requirements.txt
    - Click "Start Virtual Camera" (bottom right), then "Stop Virtual Camera".
    - Close OBS.
 
-7. Start the application by running ***Rope.bat*** file
+7. Start the application by running ***Rope_Conda.bat*** file
   
 ### Disclaimer: ###
 Rope is a personal project that I'm making available to the community as a thank you for all of the contributors ahead of me.
