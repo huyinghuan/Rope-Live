@@ -74,7 +74,7 @@ python -m pip install -r requirements.txt
 
 4. Download the required models
   
-   - **To get access to all the features of Rope**, you need to [download the models from here](https://1drv.ms/f/c/f07a89314d38026c/Enes7ZCoMdJEu2XY5ZsDQYwBRgR3J6Cgry3R7LMHm4bz_Q?e=Pbhhzc). You need all of the files.
+   - **To get access to all the features of Rope**, you need to [download the models from here](https://github.com/argenspin/rope-assets/releases/tag/1.0.0). You need all of the files.
   
    - Place the downloaded model files in the `Rope-Live/models` folder
 
