@@ -37,3 +37,9 @@ https://github.com/argenspin/rope-assets/releases/download/1.0.0/simswap_arcface
 https://github.com/argenspin/rope-assets/releases/download/1.0.0/w600k_r50.onnx
 https://github.com/argenspin/rope-assets/releases/download/1.0.0/XSeg_model.onnx
 https://github.com/argenspin/rope-assets/releases/download/1.0.0/yoloface_8n.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/ddcolor.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/ddcolor_artistic.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/GPEN-BFR-1024.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/realesr-general-x4v3.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/RestoreFormerPlusPlus.onnx
+https://github.com/argenspin/rope-assets/releases/download/1.0.0/VQFRv2.onnx
