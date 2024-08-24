@@ -35,6 +35,8 @@ This repository is only intended for use on Windows (with Nvidia CUDA).
    - Close OBS.
 4. Start using the application by running the _Start_Rope.bat_ file from the installed directory
 
+   #### Note: To get the latest updates, just run the _Update_Rope.bat_ file
+
 ### Method 2: Using Conda
 
 #### Requirements
