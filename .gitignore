@@ -8,6 +8,7 @@
 *.profile
 *.timing
 saved_parameters*.json
+startup_parameters*.json
 data.json
 merged_embeddings*.txt
 .vs
