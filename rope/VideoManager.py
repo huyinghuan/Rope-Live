@@ -1045,6 +1045,7 @@ class VideoManager():
         if dfl_model:
             latent = torch.from_numpy(self.models.calc_swapper_latent_dfl(s_e)).float().to('cuda')
             input_face_affined = original_face_512
+            dim = 4
 
         else:
             if swapper_model == 'Inswapper128':
