@@ -542,11 +542,11 @@ DEFAULT_DATA = {
 'VideoQualSliderMax':               50,
 'VideoQualSliderMin':               0,
 
-'DFLAmpMorphSliderAmount':          0,
+'DFLAmpMorphSliderAmount':          50,
 'DFLAmpMorphSliderInc':             1,
 'DFLAmpMorphSliderInfoText':        'DFL AMP MORPH FACTOR\n:Set the morph factor when using DFL AMP Models',
 'DFLAmpMorphSliderMax':             100,
-'DFLAmpMorphSliderMin':             50,
+'DFLAmpMorphSliderMin':             1,
 
 'AudioSpeedSliderAmount':           1.00,
 'AudioSpeedSliderInc':              0.01,
