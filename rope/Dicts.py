@@ -546,7 +546,7 @@ DEFAULT_DATA = {
 'DFLAmpMorphSliderInc':             1,
 'DFLAmpMorphSliderInfoText':        'DFL AMP MORPH FACTOR\n:Set the morph factor when using DFL AMP Models',
 'DFLAmpMorphSliderMax':             100,
-'DFLAmpMorphSliderMin':             1,
+'DFLAmpMorphSliderMin':             50,
 
 'AudioSpeedSliderAmount':           1.00,
 'AudioSpeedSliderInc':              0.01,

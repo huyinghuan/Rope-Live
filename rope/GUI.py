@@ -1750,6 +1750,7 @@ class GUI(tk.Tk):
         self.widget['OutputFolderButton'].set(False, request_frame=False)
         self.add_action("saved_video_path",self.json_dict["saved videos"])
 
+
     def select_faces_path(self):
         temp = self.json_dict["source faces"]
         self.json_dict["source faces"] = filedialog.askdirectory(title="Select Source Faces Folder", initialdir=temp)
@@ -1762,9 +1763,11 @@ class GUI(tk.Tk):
             outfile.close()
         self.widget['FacesFolderButton'].set(False, request_frame=False)
         self.load_input_faces()
+        self.load_dfl_input_models()
+
 
     def load_dfl_input_models(self):
-        dfl_models_dir = './dfl_models'
+        dfl_models_dir = 'dfl_models'
         j=len(self.source_faces)
         for model_file in listdir(dfl_models_dir):
             if model_file=='.gitkeep':
