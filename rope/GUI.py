@@ -1124,6 +1124,9 @@ class GUI(tk.Tk):
         row = row + 1
         self.widget['DFLXSegSlider'] = GE.Slider2(self.layer['parameters_frame'], 'DFLXSegSlider', 'Size', 3, self.update_data, 'parameter', 398, 20, row, 0, padx, pady, 0.62)
 
+        # DFL AMP Morph Factor
+        row = row + 1
+        self.widget['DFLAmpMorphSlider'] = GE.Slider2(self.layer['parameters_frame'], 'DFLAmpMorphSlider', 'DFL AMP Morph Factor', 3, self.update_data, 'parameter', 398, 20, row, 0, padx, pady, 0.62)
         # CLIP
         row = row + 1
         self.widget['CLIPSwitch'] = GE.Switch2(self.layer['parameters_frame'], 'CLIPSwitch', 'Text-Based Masking', 3, self.update_data, 'parameter', 398, 20, row, 0, padx, pady)
@@ -1761,7 +1764,6 @@ class GUI(tk.Tk):
         self.load_input_faces()
 
     def load_dfl_input_models(self):
-        dfl_models = []
         dfl_models_dir = './dfl_models'
         j=len(self.source_faces)
         for model_file in listdir(dfl_models_dir):
