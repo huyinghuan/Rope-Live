@@ -15,6 +15,9 @@ onnxruntime.log_verbosity_level = -1
 import rope.FaceUtil as faceutil
 import pickle
 import math
+from dfl.DFMModel import DFMModel
+from dfl.xlib.onnxruntime.device import ORTDeviceInfo
+
 
 class Models():
     def __init__(self):
@@ -49,6 +52,7 @@ class Models():
         self.ghostfacev2swap_model = []
         self.ghostfacev3swap_model = []
 
+        self.dfl_models = {}
         self.emap = []
         self.GFPGAN_model = []
         self.GPEN_256_model = []
@@ -290,6 +294,7 @@ class Models():
         self.occluder_model = []
         self.model_xseg = []
         self.faceparser_model = []
+        self.dfl_model = []
 
     def run_recognize(self, img, kps, similarity_type='Opal', face_swapper_model='Inswapper128'):
         if face_swapper_model == 'Inswapper128':
@@ -414,6 +419,12 @@ class Models():
 
         self.syncvec.cpu()
         ghostfaceswap_model.run_with_iobinding(io_binding)
+
+
+    def calc_swapper_latent_dfl(self, source_embedding):
+        latent = source_embedding.reshape((1,-1))
+
+        return latent
 
     def run_swap_stg1(self, embedding):
 
