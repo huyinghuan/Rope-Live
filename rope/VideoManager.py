@@ -25,7 +25,6 @@ import inspect #print(inspect.currentframe().f_back.f_code.co_name, 'resize_imag
 import pyvirtualcam
 import platform
 import psutil
-import matplotlib.pyplot as plt
 device = 'cuda'
 from dfl.DFMModel import DFMModel
 
@@ -1101,10 +1100,6 @@ class VideoManager():
         input_face_affined = torch.div(input_face_affined, 255.0)
 
 
-        # DFL Model Test
-        def show_image(img):
-            plt.imshow(img.cpu().numpy())
-            plt.show()
         if dfl_model:
             # Get face alignment image processor
             fai_ip = dfl_model.get_fai_ip(original_face_512.permute(1, 2, 0).cpu().numpy())
