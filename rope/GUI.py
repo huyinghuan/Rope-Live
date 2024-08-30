@@ -27,7 +27,7 @@ from tkinter import messagebox
 
 from os import listdir
 from os.path import isfile, join
-
+import platform
 import inspect #print(inspect.currentframe().f_back.f_code.co_name, 'resize_image')
 from platform import system
 
@@ -2085,7 +2085,13 @@ class GUI(tk.Tk):
         #Webcam setup
         try:
             for i in range(self.parameters['WebCamMaxNoSlider']):
-                camera_capture = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+                if platform.system == 'Windows':
+                    try:
+                        camera_capture = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+                    except:
+                        camera_capture = cv2.VideoCapture(i)
+                else:
+                    camera_capture = cv2.VideoCapture(i)
                 success, webcam_frame = camera_capture.read()
                 ratio = float(webcam_frame.shape[0]) / webcam_frame.shape[1]
 
