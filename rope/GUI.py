@@ -1782,8 +1782,9 @@ class GUI(tk.Tk):
             button_text = f"(DFM) {model_file.split('.')[0]}"
 
             # Measure the text width
-            text_width = text_font.measure(button_text)
-            new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=button_text, height=14, width=text_width, compound='left')
+            # text_width = text_font.measure(button_text)
+            text_width = text_font.measure('ABCDEFGHIJKLMNO')
+            new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=button_text, height=14, width=text_width, compound='left', anchor='w')
 
             new_source_face["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=j: self.select_input_faces(event, arg))
             new_source_face["TKButton"].bind("<MouseWheel>", lambda event: self.merged_faces_canvas.xview_scroll(-int(event.delta/120.0), "units"))
@@ -1827,9 +1828,9 @@ class GUI(tk.Tk):
                 new_source_face["ButtonState"] = False
                 new_source_face["Embedding"] = temp0[j][1]
 
-                text_width = text_font.measure(temp0[j][0]) + 10
+                text_width = text_font.measure('ABCDEFGHIJKLMNO')
 
-                new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=temp0[j][0], height=14, width=text_width, compound='left')
+                new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=temp0[j][0], height=14, width=text_width, compound='left', anchor='w')
 
                 new_source_face["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=j: self.select_input_faces(event, arg))
                 new_source_face["TKButton"].bind("<MouseWheel>", lambda event: self.merged_faces_canvas.xview_scroll(-int(event.delta/120.0), "units"))
