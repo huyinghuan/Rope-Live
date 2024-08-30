@@ -1815,12 +1815,15 @@ class GUI(tk.Tk):
         # First load merged embeddings
         try:
             temp0 = []
-            with open("merged_embeddings.txt", "r") as embedfile:
-                temp = embedfile.read().splitlines()
+            try:
+                with open("merged_embeddings.txt", "r") as embedfile:
+                    temp = embedfile.read().splitlines()
 
-                for i in range(0, len(temp), 513):
-                    to = [temp[i][6:], np.array(temp[i+1:i+513], dtype='float32')]
-                    temp0.append(to)
+                    for i in range(0, len(temp), 513):
+                        to = [temp[i][6:], np.array(temp[i+1:i+513], dtype='float32')]
+                        temp0.append(to)
+            except:
+                pass
 
             for j in range(len(temp0)):
                 new_source_face = self.source_face.copy()
