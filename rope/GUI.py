@@ -1720,7 +1720,6 @@ class GUI(tk.Tk):
 
         self.populate_target_videos()
         self.load_input_faces()
-        self.load_dfl_input_models()
 
         self.widget['StartButton'].enable_button()
 
@@ -1763,7 +1762,6 @@ class GUI(tk.Tk):
             outfile.close()
         self.widget['FacesFolderButton'].set(False, request_frame=False)
         self.load_input_faces()
-        self.load_dfl_input_models()
 
 
     def load_dfl_input_models(self):
@@ -1825,6 +1823,8 @@ class GUI(tk.Tk):
                 self.source_faces[j]["TKButton"].bind("<MouseWheel>", lambda event: self.merged_faces_canvas.xview_scroll(-int(event.delta/120.0), "units"))
 
                 self.merged_faces_canvas.create_window((j//4)*92,8+(22*(j%4)), window = self.source_faces[j]["TKButton"],anchor='nw')
+
+            self.load_dfl_input_models()
 
             self.merged_faces_canvas.configure(scrollregion = self.merged_faces_canvas.bbox("all"))
             self.merged_faces_canvas.xview_moveto(0)
