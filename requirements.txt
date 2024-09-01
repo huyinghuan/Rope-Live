@@ -15,5 +15,6 @@ ftfy
 regex
 customtkinter
 pyvirtualcam==0.11.1
-psutil
+psutil==6.0.0
+onnxruntime-gpu==1.18.0
 numexpr
