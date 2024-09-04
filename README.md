@@ -88,6 +88,10 @@ python -m pip install -r requirements.txt
 
 
  **Note: To use DFL models for swapping, put you models (.dfm) to the dfl_models directory**
+ 
+## [Donate](https://www.paypal.com/ncp/payment/NUV32JYCYB962)
+## [Join Discord](https://discord.gg/EcdVAFJzqp)
+
 ### Disclaimer: ###
 Rope is a personal project that I'm making available to the community as a thank you for all of the contributors ahead of me.
 I've copied the disclaimer from [Swap-Mukham](https://github.com/harisreedhar/Swap-Mukham) here since it is well-written and applies 100% to this repo.
