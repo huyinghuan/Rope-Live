@@ -1297,9 +1297,25 @@ class VideoManager():
         if parameters["RestorerSwitch"]:
             swap = self.func_w_test('Restorer', self.apply_restorer, swap, parameters)
 
+
         # Apply color corerctions
         if parameters['ColorSwitch']:
-            swap = Swapper.process_swap_color(swap, parameters, device)
+            # print(parameters['ColorGammaSlider'])
+            swap = torch.unsqueeze(swap,0).contiguous()
+            swap = v2.functional.adjust_gamma(swap, parameters['ColorGammaSlider'], 1.0)
+            swap = torch.squeeze(swap)
+            swap = swap.permute(1, 2, 0).type(torch.float32)
+
+            del_color = torch.tensor([parameters['ColorRedSlider'], parameters['ColorGreenSlider'], parameters['ColorBlueSlider']], device=device)
+            swap += del_color
+            swap = torch.clamp(swap, min=0., max=255.)
+            swap = swap.permute(2, 0, 1).type(torch.uint8)
+
+            swap = v2.functional.adjust_brightness(swap, parameters['ColorBrightSlider'])
+            swap = v2.functional.adjust_contrast(swap, parameters['ColorContrastSlider'])
+            swap = v2.functional.adjust_saturation(swap, parameters['ColorSaturationSlider'])
+            swap = v2.functional.adjust_sharpness(swap, parameters['ColorSharpnessSlider'])
+            swap = v2.functional.adjust_hue(swap, parameters['ColorHueSlider'])
 
         # Occluder
         if parameters["OccluderSwitch"]:
