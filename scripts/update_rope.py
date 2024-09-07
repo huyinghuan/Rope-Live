@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 def install_requirements():
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt", "--default-timeout", "100"])
 
 def get_filename_from_link(folder, file_link):
     return f"{folder}{file_link.split(r'/')[-1]}"
