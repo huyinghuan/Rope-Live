@@ -90,7 +90,7 @@ python -m pip install -r requirements.txt
  **Note: To use DFL models for swapping, put you models (.dfm) to the dfl_models directory**
  
 ## [Donate](https://www.paypal.com/ncp/payment/NUV32JYCYB962)
-## [Join Discord](https://discord.gg/hHW7b8Ka)
+## [Join Discord](https://discord.gg/5rx4SQuDbp)
 
 ### Disclaimer: ###
 Rope is a personal project that I'm making available to the community as a thank you for all of the contributors ahead of me.
