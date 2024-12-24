@@ -994,9 +994,9 @@ class GUI(tk.Tk):
         frame.grid(row=0, column=0, columnspan = 2, sticky='NEWS', padx=0, pady=0)
 
         # Buttons
-        self.widget['VideoFolderButton'] = GE.Button(frame, 'LoadTVideos', 2, self.select_video_path, None, 'control', 10, 1, width=195)
-        self.input_videos_text = GE.Text(frame, '', 2, 10, 20, 190, 20)
-
+        # self.widget['VideoFolderButton'] = GE.Button(frame, 'LoadTVideos', 2, self.select_video_path, None, 'control', 10, 1, width=195)
+        # self.input_videos_text = GE.Text(frame, '', 2, 10, 20, 190, 20)
+       
         # Input Videos Canvas
         self.target_media_canvas = tk.Canvas(self.layer['InputVideoFrame'], style.canvas_frame_label_3, height=100, width=195)
         self.target_media_canvas.grid(row=1, column=0, sticky='NEWS', padx=10, pady=10)
@@ -1017,9 +1017,10 @@ class GUI(tk.Tk):
         frame.grid(row=0, column=2, columnspan = 2, sticky='NEWS', padx=0, pady=0)
 
         # Buttons
-        self.widget['FacesFolderButton'] = GE.Button(frame, 'LoadSFaces', 2, self.select_faces_path, None, 'control', 10, 1, width=195)
-        self.input_faces_text = GE.Text(frame, '', 2, 10, 20, 190, 20)
-
+        # self.widget['FacesFolderButton'] = GE.Button(frame, 'LoadSFaces', 2, self.select_faces_path, None, 'control', 10, 1, width=195)
+        # self.input_faces_text = GE.Text(frame, '', 2, 10, 20, 190, 20)
+        self.widget['ReloadLoadSFacesButton'] = GE.Button(frame, 'ReloadLoadSFaces', 2, self.load_userdata_source_faces, None, 'control', 10, 1, width=195)
+       
         # Scroll Canvas
         self.source_faces_canvas = tk.Canvas(self.layer['InputVideoFrame'], style.canvas_frame_label_3, height = 100, width=195)
         self.source_faces_canvas.grid(row=1, column=2, sticky='NEWS', padx=10, pady=10)
@@ -1994,27 +1995,27 @@ class GUI(tk.Tk):
             if self.widget[key].get_data_type()=='parameter_face_editor':
                 self.parameters_face_editor[key] = self.widget[key].get()
 
-        try:
-            self.json_dict["source videos"] = json_object["source videos"]
-        except KeyError:
-            self.widget['VideoFolderButton'].error_button()
-        else:
-            if self.json_dict["source videos"] == None:
-                self.widget['VideoFolderButton'].error_button()
-            else:
-                path = self.create_path_string(self.json_dict["source videos"], 28)
-                self.input_videos_text.configure(text=path)
+        # try:
+        #     self.json_dict["source videos"] = json_object["source videos"]
+        # except KeyError:
+        #     self.widget['VideoFolderButton'].error_button()
+        # else:
+        #     if self.json_dict["source videos"] == None:
+        #         self.widget['VideoFolderButton'].error_button()
+        #     else:
+        #         path = self.create_path_string(self.json_dict["source videos"], 28)
+        #         self.input_videos_text.configure(text=path)
 
-        try:
-            self.json_dict["source faces"] = json_object["source faces"]
-        except KeyError:
-            self.widget['FacesFolderButton'].error_button()
-        else:
-            if self.json_dict["source faces"] == None:
-                self.widget['FacesFolderButton'].error_button()
-            else:
-                path = self.create_path_string(self.json_dict["source faces"], 28)
-                self.input_faces_text.configure(text=path)
+        # try:
+        #     self.json_dict["source faces"] = json_object["source faces"]
+        # except KeyError:
+        #     self.widget['FacesFolderButton'].error_button()
+        # else:
+        #     if self.json_dict["source faces"] == None:
+        #         self.widget['FacesFolderButton'].error_button()
+        #     else:
+        #         path = self.create_path_string(self.json_dict["source faces"], 28)
+        #         self.input_faces_text.configure(text=path)
 
         try:
             self.json_dict["saved videos"] = json_object["saved videos"]
@@ -2078,6 +2079,10 @@ class GUI(tk.Tk):
 
         self.widget['StartButton'].error_button()
         self.set_view(False, '')
+        
+        # 加载摄像头
+        self.load_userdata_videos()
+        self.load_userdata_source_faces()
 
     def create_path_string(self, path, text_len):
         if len(path)>text_len:
@@ -2102,18 +2107,18 @@ class GUI(tk.Tk):
 
         self.widget['StartButton'].enable_button()
 
-    def select_video_path(self):
-        temp = self.json_dict["source videos"]
-        self.json_dict["source videos"] = filedialog.askdirectory(title="Select Target Videos Folder", initialdir=temp)
+    # def select_video_path(self):
+    #     temp = self.json_dict["source videos"]
+    #     self.json_dict["source videos"] = filedialog.askdirectory(title="Select Target Videos Folder", initialdir=temp)
 
-        path = self.create_path_string(self.json_dict["source videos"], 28)
-        self.input_videos_text.configure(text=path)
+    #     path = self.create_path_string(self.json_dict["source videos"], 28)
+    #     self.input_videos_text.configure(text=path)
 
-        with open("data.json", "w") as outfile:
-            json.dump(self.json_dict, outfile)
-            outfile.close()
-        self.widget['VideoFolderButton'].set(False, request_frame=False)
-        self.populate_target_videos()
+    #     with open("data.json", "w") as outfile:
+    #         json.dump(self.json_dict, outfile)
+    #         outfile.close()
+    #     self.widget['VideoFolderButton'].set(False, request_frame=False)
+    #     self.populate_target_videos()
 
     def select_save_video_path(self):
         temp = self.json_dict["saved videos"]
@@ -2129,18 +2134,18 @@ class GUI(tk.Tk):
         self.add_action("saved_video_path",self.json_dict["saved videos"])
 
 
-    def select_faces_path(self):
-        temp = self.json_dict["source faces"]
-        self.json_dict["source faces"] = filedialog.askdirectory(title="Select Source Faces Folder", initialdir=temp)
+    # def select_faces_path(self):
+    #     temp = self.json_dict["source faces"]
+    #     self.json_dict["source faces"] = filedialog.askdirectory(title="Select Source Faces Folder", initialdir=temp)
 
-        path = self.create_path_string(self.json_dict["source faces"], 28)
-        self.input_faces_text.configure(text=path)
+    #     path = self.create_path_string(self.json_dict["source faces"], 28)
+    #     self.input_faces_text.configure(text=path)
 
-        with open("data.json", "w") as outfile:
-            json.dump(self.json_dict, outfile)
-            outfile.close()
-        self.widget['FacesFolderButton'].set(False, request_frame=False)
-        self.load_input_faces()
+    #     with open("data.json", "w") as outfile:
+    #         json.dump(self.json_dict, outfile)
+    #         outfile.close()
+    #     self.widget['FacesFolderButton'].set(False, request_frame=False)
+    #     self.load_input_faces()
 
     def load_dfl_input_models(self):
         text_font = font.Font(family="Helvetica", size=10)
@@ -2304,6 +2309,130 @@ class GUI(tk.Tk):
 
 
         torch.cuda.empty_cache()
+    def load_userdata_source_faces(self):
+        self.widget['ReloadLoadSFacesButton'].set(False, request_frame=False)
+        self.source_faces = []
+        self.merged_faces_canvas.delete("all")
+        self.source_faces_canvas.delete("all")
+
+        text_font = font.Font(family="Helvetica", size=10)
+
+        # First load merged embeddings
+        try:
+            temp0 = []
+            try:
+                with open("merged_embeddings.txt", "r") as embedfile:
+                    temp = embedfile.read().splitlines()
+
+                    for i in range(0, len(temp), 513):
+                        to = [temp[i][6:], np.array(temp[i+1:i+513], dtype='float32')]
+                        temp0.append(to)
+            except:
+                pass
+
+            for j in range(len(temp0)):
+                new_source_face = self.source_face.copy()
+
+                new_source_face["ButtonState"] = False
+                new_source_face["Embedding"] = temp0[j][1]
+
+                text_width = text_font.measure('ABCDEFGHIJKLMNO')
+
+                new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=temp0[j][0], height=14, width=text_width, compound='left', anchor='w')
+
+                new_source_face["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=j: self.select_replace_faces(event, arg))
+                new_source_face["TKButton"].bind("<MouseWheel>", lambda event: self.merged_faces_canvas.xview_scroll(-int(event.delta/120.0), "units"))
+                new_source_face['TextWidth'] = text_width
+                x_width = 20
+                if len(self.source_faces)>0:
+                    x_width += self.get_adjacent_element_width(j)
+                new_source_face['XCoord'] = x_width
+                self.merged_faces_canvas.create_window(x_width,8+(22*(j%4)), window = new_source_face["TKButton"],anchor='nw')
+                self.source_faces.append(new_source_face)
+
+            self.load_dfl_input_models()
+
+            self.merged_faces_canvas.configure(scrollregion = self.merged_faces_canvas.bbox("all"))
+            self.merged_faces_canvas.xview_moveto(0)
+
+        except Exception as e:
+            pass
+
+        self.shift_i_len = len(self.source_faces)
+
+        # Recursively read all media files from directory
+        current_directory = os.getcwd()
+        directory = os.path.join(current_directory, "userdata", "source-images")
+        filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
+    
+        # torch.cuda.memory._record_memory_history(True, trace_alloc_max_entries=100000, trace_alloc_record_context=True)
+        i=0
+        for file in filenames: # Does not include full path
+            # Find all faces and ad to faces[]
+            # Guess File type based on extension
+            try:
+                file_type = mimetypes.guess_type(file)[0][:5]
+            except:
+                print('Unrecognized file type:', file)
+            else:
+                if file_type != 'image':
+                    continue
+                # Its an image
+                img = cv2.imread(file)
+                if img is None:
+                    print('Bad file', file)
+                    continue
+                img = torch.from_numpy(img.astype('uint8')).to('cuda')
+
+                pad_scale = 0.2
+                padded_width = int(img.size()[1]*(1.+pad_scale))
+                padded_height = int(img.size()[0]*(1.+pad_scale))
+
+                padding = torch.zeros((padded_height, padded_width, 3), dtype=torch.uint8, device='cuda:0')
+
+                width_start = int(img.size()[1]*pad_scale/2)
+                width_end = width_start+int(img.size()[1])
+                height_start = int(img.size()[0]*pad_scale/2)
+                height_end = height_start+int(img.size()[0])
+
+                padding[height_start:height_end, width_start:width_end,  :] = img
+                img = padding
+
+                img = img.permute(2,0,1)
+                try:
+                    if self.parameters["AutoRotationSwitch"]:
+                        rotation_angles = [0, 90, 180, 270]
+                    else:
+                        rotation_angles = [0]
+                    bboxes, kpss_5, _ = self.models.run_detect(img, detect_mode=self.parameters["DetectTypeTextSel"], max_num=1, score=0.5, use_landmark_detection=self.parameters['LandmarksDetectionAdjSwitch'], landmark_detect_mode=self.parameters["LandmarksDetectTypeTextSel"], landmark_score=0.5, from_points=self.parameters["LandmarksAlignModeFromPointsSwitch"], rotation_angles=rotation_angles) # Just one face here
+                    kpss_5 = kpss_5[0]
+                except IndexError:
+                    print('Image cropped too close:', file)
+                else:
+                    face_emb, cropped_image = self.models.run_recognize(img, kpss_5, self.parameters["SimilarityTypeTextSel"], self.parameters['FaceSwapperModelTextSel'])
+                    crop = cv2.cvtColor(cropped_image.cpu().numpy(), cv2.COLOR_BGR2RGB)
+                    crop = cv2.resize(crop, (85, 85))
+
+                    new_source_face = self.source_face.copy()
+                    self.source_faces.append(new_source_face)
+
+                    self.source_faces[-1]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
+                    self.source_faces[-1]["Embedding"] = face_emb
+                    self.source_faces[-1]["TKButton"] = tk.Button(self.source_faces_canvas, style.media_button_off_3, image=self.source_faces[-1]["Image"], height=90, width=90)
+                    self.source_faces[-1]["ButtonState"] = False
+                    self.source_faces[-1]["file"] = file
+
+                    self.source_faces[-1]["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=len(self.source_faces)-1: self.select_input_faces(event, arg))
+                    self.source_faces[-1]["TKButton"].bind("<MouseWheel>", self.source_faces_mouse_wheel)
+
+                    self.source_faces_canvas.create_window((i % 2) * 100, (i // 2) * 100, window=self.source_faces[-1]["TKButton"], anchor='nw')
+
+                    self.static_widget['input_faces_scrollbar'].resize_scrollbar(None)
+                    i = i + 1
+
+        torch.cuda.empty_cache()
+        
+        self.widget['ReloadLoadSFacesButton'].set(True, request_frame=False)
 
     def find_faces(self):
         try:
@@ -2680,6 +2809,122 @@ class GUI(tk.Tk):
 
         # Recursively read all media files from directory
         directory =  self.json_dict["source videos"]
+        filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
+
+        images = []
+        self.target_media = []
+        self.target_media_buttons = []
+        self.target_media_canvas.delete("all")
+
+        for file in filenames: # Does not include full path
+            # Guess File type based on extension
+            try:
+                file_type = mimetypes.guess_type(file)[0][:5]
+            except:
+                print('Unrecognized file type:', file)
+            else:
+                # Its an image
+                if file_type == 'image':
+                    try:
+                        image = cv2.imread(file)
+                        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    except:
+                        print('Trouble reading file:', file)
+                    else:
+                        ratio = float(image.shape[0]) / image.shape[1]
+
+                        new_height = 50
+                        new_width = int(new_height / ratio)
+                        image = cv2.resize(image, (new_width, new_height))
+                        image[:new_height, :new_width, :] = image
+                        images.append([image, file])
+
+                # Its a video
+                elif file_type == 'video':
+                    try:
+                        video = cv2.VideoCapture(file)
+                    except:
+                        print('Trouble reading file:', file)
+                    else:
+                        if video.isOpened():
+
+                            # Grab a frame from the middle for a thumbnail
+                            video.set(cv2.CAP_PROP_POS_FRAMES, int(video.get(cv2.CAP_PROP_FRAME_COUNT)/2))
+                            success, video_frame = video.read()
+
+                            if success:
+                                video_frame = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
+                                ratio = float(video_frame.shape[0]) / video_frame.shape[1]
+
+                                new_height = 50
+                                new_width = int(new_height / ratio)
+                                video_frame = cv2.resize(video_frame, (new_width, new_height))
+                                video_frame[:new_height, :new_width, :] = video_frame
+
+                                videos.append([video_frame, file])
+                                video.release()
+
+                            else:
+                                print('Trouble reading file:', file)
+                        else:
+                            print('Trouble opening file:', file)
+        delx, dely = 100, 79
+        if self.widget['PreviewModeTextSel'].get()== 'Image':#images
+            for i in range(len(images)):
+                self.target_media_buttons.append(tk.Button(self.target_media_canvas, style.media_button_off_3, height = 86, width = 86))
+
+                rgb_video = Image.fromarray(images[i][0])
+                self.target_media.append(ImageTk.PhotoImage(image=rgb_video))
+                self.target_media_buttons[i].config( image = self.target_media[i],  command=lambda i=i: self.load_target(i, images[i][1], self.widget['PreviewModeTextSel'].get()))
+                self.target_media_buttons[i].bind("<MouseWheel>", self.target_videos_mouse_wheel)
+                self.target_media_canvas.create_window((i%2)*delx, (i//2)*dely, window = self.target_media_buttons[i], anchor='nw')
+
+            #self.target_media_canvas.configure(scrollregion = self.target_media_canvas.bbox("all"))
+            self.static_widget['input_videos_scrollbar'].resize_scrollbar(None)
+
+        elif self.widget['PreviewModeTextSel'].get()=='Video':#videos
+
+            for i in range(len(videos)):
+                self.target_media_buttons.append(tk.Button(self.target_media_canvas, style.media_button_off_3, height = 65, width = 90))
+                self.target_media.append(ImageTk.PhotoImage(image=Image.fromarray(videos[i][0])))
+
+                filename = os.path.basename(videos[i][1])
+                if len(filename)>14:
+                    filename = filename[:11]+'...'
+
+                self.target_media_buttons[i].bind("<MouseWheel>", self.target_videos_mouse_wheel)
+                self.target_media_buttons[i].config(image = self.target_media[i], text=filename, compound='top', anchor='n',command=lambda i=i: self.load_target(i, videos[i][1], self.widget['PreviewModeTextSel'].get()))
+                self.target_media_canvas.create_window((i%2)*delx, (i//2)*dely, window = self.target_media_buttons[i], anchor='nw')
+
+            self.static_widget['input_videos_scrollbar'].resize_scrollbar(None)
+        
+    def load_userdata_videos(self):
+        videos = []
+        #Webcam setup
+        camera_backend = CAMERA_BACKENDS[self.parameters['WebCamBackendSel']]
+        for i in range(self.parameters['WebCamMaxNoSlider']):
+            try:
+                camera = cv2.VideoCapture(i, camera_backend)
+                if not camera.isOpened():
+                    continue
+                success, webcam_frame = camera.read()
+                if not success:
+                    continue
+                ratio = float(webcam_frame.shape[0]) / webcam_frame.shape[1]
+                new_height = 50
+                new_width = int(new_height / ratio)
+                webcam_frame = cv2.resize(webcam_frame, (new_width, new_height))
+                webcam_frame = cv2.cvtColor(webcam_frame, cv2.COLOR_BGR2RGB)
+                webcam_frame[:new_height, :new_width, :] = webcam_frame
+                videos.append([webcam_frame, f'Webcam {i}'])
+                camera.release()
+            except Exception as e:
+                print(e)
+
+
+        # Recursively read all media files from directory
+        current_directory = os.getcwd()
+        directory = os.path.join(current_directory, "userdata", "source-videos")
         filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
 
         images = []
