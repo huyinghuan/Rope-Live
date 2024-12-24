@@ -265,7 +265,7 @@ class GUI(tk.Tk):
         self.input_videos_text = []
         self.target_media_canvas = []
         self.source_faces_buttons = []
-        self.input_videos_button = []
+        #self.input_videos_button = []
         self.input_faces_text = []
         self.shift_i_len = 0
         self.source_faces_canvas = []
@@ -1165,13 +1165,12 @@ class GUI(tk.Tk):
         # Buttons
         button_frame = tk.Frame(ff_frame, style.canvas_frame_label_2, height = 166, width = 112)
         button_frame.grid( row = 0, column = 0, )
-
         self.widget['FindFacesButton'] = GE.Button(button_frame, 'FindFaces', 2, self.find_faces, None, 'control', x=0, y=0, width=112, height=33)
         self.widget['ClearFacesButton'] = GE.Button(button_frame, 'ClearFaces', 2, self.clear_faces, None, 'control', x=0, y=33, width=112, height=33)
         self.widget['SwapFacesButton'] = GE.Button(button_frame, 'SwapFaces', 2, self.toggle_swapper, None, 'control', x=0, y=66, width=112, height=33)
-        self.widget['EditFacesButton'] = GE.Button(button_frame, 'EditFaces', 2, self.toggle_faces_editor, None, 'control', x=0, y=99, width=112, height=33)
+        #self.widget['EditFacesButton'] = GE.Button(button_frame, 'EditFaces', 2, self.toggle_faces_editor, None, 'control', x=0, y=99, width=112, height=33)
+        self.widget['LoadExistFacesButton'] = GE.Button(button_frame, 'LoadExistFaces', 2, self.load_exist_faces, None, 'control', x=0, y=99, width=112, height=33)
         self.widget['EnhanceFrameButton'] = GE.Button(button_frame, 'EnhanceFrame', 2, self.toggle_enhancer, None, 'control', x=0, y=132, width=112, height=33)
-
         # Scroll Canvas
         self.found_faces_canvas = tk.Canvas(ff_frame, style.canvas_frame_label_3, height = 100 )
         self.found_faces_canvas.grid( row = 0, column = 1, sticky='NEWS')
@@ -2366,6 +2365,78 @@ class GUI(tk.Tk):
                         self.found_faces_canvas.create_window((last_index)*92, 8, window=self.target_faces[last_index]["TKButton"], anchor='nw')
 
                         self.found_faces_canvas.configure(scrollregion = self.found_faces_canvas.bbox("all"))
+    def load_exist_faces(self):
+        current_directory = os.getcwd()
+        # 构建 userdata/target-faces 路径
+        directory = os.path.join(current_directory, "userdata", "target-faces")
+        filenames = [os.path.join(dirpath,f) for (dirpath, dirnames, filenames) in os.walk(directory) for f in filenames]
+        ret = []
+        
+        for filename in filenames:
+            try:
+                if filename.endswith('.jpg') or filename.endswith('.png'):
+                    # 读取图像文件
+                    # 将图像从BGR格式转换为RGB格式
+                    image = cv2.cvtColor(cv2.imread(filename), cv2.COLOR_BGR2RGB)
+                    # 将图像转换为张量
+                    img = torch.from_numpy(image).to('cuda')
+                    img = img.permute(2,0,1)
+                    if self.parameters["AutoRotationSwitch"]:
+                        rotation_angles = [0, 90, 180, 270]
+                    else:
+                        rotation_angles = [0]
+                    bboxes, kpss_5, _ = self.models.run_detect(img, detect_mode=self.parameters["DetectTypeTextSel"], max_num=50, score=self.parameters["DetectScoreSlider"]/100.0, use_landmark_detection=self.parameters['LandmarksDetectionAdjSwitch'], landmark_detect_mode=self.parameters["LandmarksDetectTypeTextSel"], landmark_score=self.parameters["LandmarksDetectScoreSlider"]/100.0, from_points=self.parameters["LandmarksAlignModeFromPointsSwitch"], rotation_angles=rotation_angles)
+                    for face_kps in kpss_5:
+                        face_emb, cropped_img = self.models.run_recognize(img, face_kps, self.parameters["SimilarityTypeTextSel"], self.parameters['FaceSwapperModelTextSel'])
+                        ret.append([face_kps, face_emb, cropped_img])
+            except Exception:
+                messagebox.showinfo('Read Image', 'Read Image Error'+filename)
+                print('Read Image Error'+ filename)
+
+        if not ret:
+            messagebox.showinfo('No Faces', 'No faces found')
+            print("No faces found")
+            return
+
+        # Apply threshold tolerence
+        threshhold = self.parameters["ThresholdSlider"]
+
+        # if self.parameters["ThresholdState"]:
+            # threshhold = 0.0
+
+        # Loop thgouh all faces in video frame
+        for face in ret:
+            found = False
+
+            # Check if this face has already been found
+            for emb in self.target_faces:
+                if self.findCosineDistance(emb['Embedding'], face[1]) >= threshhold:
+                    found = True
+                    break
+
+            # If we dont find any existing simularities, it means that this is a new face and should be added to our found faces
+            if not found:
+                crop = cv2.resize(face[2].cpu().numpy(), (82, 82))
+
+                new_target_face = self.target_face.copy()
+                self.target_faces.append(new_target_face)
+                last_index = len(self.target_faces)-1
+
+                self.target_faces[last_index]["TKButton"] = tk.Button(self.found_faces_canvas, style.media_button_off_3, height = 86, width = 86)
+                self.target_faces[last_index]["TKButton"].bind("<MouseWheel>", self.target_faces_mouse_wheel)
+                self.target_faces[last_index]["ButtonState"] = False
+                self.target_faces[last_index]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
+                self.target_faces[last_index]["Embedding"] = face[1]
+                self.target_faces[last_index]["EmbeddingNumber"] = 1
+
+                # Add image to button
+                self.target_faces[-1]["TKButton"].config( pady = 10, image = self.target_faces[last_index]["Image"], command=lambda k=last_index: self.toggle_found_faces_buttons_state(k))
+
+                # Add button to canvas
+                self.found_faces_canvas.create_window((last_index)*92, 8, window=self.target_faces[last_index]["TKButton"], anchor='nw')
+
+                self.found_faces_canvas.configure(scrollregion = self.found_faces_canvas.bbox("all"))
+                
 
     def clear_faces(self):
         self.target_faces = []
