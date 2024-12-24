@@ -2213,7 +2213,7 @@ class GUI(tk.Tk):
 
                 new_source_face["TKButton"] = tk.Button(self.merged_faces_canvas, style.media_button_off_3, image=self.blank, text=temp0[j][0], height=14, width=text_width, compound='left', anchor='w')
 
-                new_source_face["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=j: self.select_input_faces(event, arg))
+                new_source_face["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=j: self.select_replace_faces(event, arg))
                 new_source_face["TKButton"].bind("<MouseWheel>", lambda event: self.merged_faces_canvas.xview_scroll(-int(event.delta/120.0), "units"))
                 new_source_face['TextWidth'] = text_width
                 x_width = 20
@@ -2462,6 +2462,75 @@ class GUI(tk.Tk):
         for i in range(len(self.target_faces[button]["SourceFaceAssignments"])):
             self.source_faces[self.target_faces[button]["SourceFaceAssignments"][i]]["ButtonState"] = True
             self.source_faces[self.target_faces[button]["SourceFaceAssignments"][i]]["TKButton"].config(style.media_button_on_3)
+
+    def select_replace_faces(self, event, button):
+        for face in self.source_faces:
+            face["TKButton"].config(style.media_button_off_3)
+            face["ButtonState"] = False
+
+        self.source_faces[button]["ButtonState"] = not self.source_faces[button]["ButtonState"]
+        # Highlight all of input faces buttons that have a true state
+        for face in self.source_faces:
+            if face["ButtonState"]:
+                face["TKButton"].config(style.media_button_on_3)
+                if self.widget['PreviewModeTextSel'].get() == 'FaceLab':
+                    self.add_action("load_target_image", face["file"])
+                    self.image_loaded = True
+
+        if self.source_faces[button]['DFLModel']:
+            # Clear DFL models from memory
+            if self.models.dfl_models and self.parameters['DFLLoadOnlyOneSwitch']:
+                for model in list(self.models.dfl_models):
+                    if model!=self.source_faces[button]['DFLModel']:
+                        del self.models.dfl_models[model]._sess
+                        del self.models.dfl_models[model]
+                gc.collect()
+
+        # Assign all active input faces to the active target face
+        for tface in self.target_faces:
+            if not tface["ButtonState"]:
+                # Clear all of the assignments
+                continue
+            tface["SourceFaceAssignments"] = []
+            tface['DFLModel'] = False
+
+            # Iterate through all Input faces
+            temp_holder = []
+            for j in range(len(self.source_faces)):
+
+                # If the source face is active
+                if self.source_faces[j]["ButtonState"]:
+                    tface["SourceFaceAssignments"].append(j)
+                    # Only append embedding if it is not a DFL model
+                    if not self.source_faces[j]['DFLModel']:
+                        temp_holder.append(self.source_faces[j]['Embedding'])
+
+                    if self.source_faces[j]['DFLModel']:
+                        # Clear DFL models from memory
+                        if self.models.dfl_models and self.parameters['DFLLoadOnlyOneSwitch']:
+                            for model in list(self.models.dfl_models):
+                                del self.models.dfl_models[model]._sess
+                                del self.models.dfl_models[model]
+                            gc.collect()
+                        tface['DFLModel'] = self.source_faces[j]['DFLModel']
+
+            # do averaging
+            if temp_holder:
+                if self.widget['MergeTextSel'].get() == 'Median':
+                    tface['AssignedEmbedding'] = np.median(temp_holder, 0)
+                elif self.widget['MergeTextSel'].get() == 'Mean':
+                    tface['AssignedEmbedding'] = np.mean(temp_holder, 0)
+
+                self.temp_emb = tface['AssignedEmbedding']
+            else:
+                tface['AssignedEmbedding'] = []
+
+                # for k in range(512):
+                #     self.widget['emb_vec_' + str(k)].set(tface['AssignedEmbedding'][k], False)
+            break
+
+        self.add_action("target_faces", self.target_faces)
+        self.add_action('get_requested_video_frame', self.video_slider.get())
 
     def select_input_faces(self, event, button):
 
