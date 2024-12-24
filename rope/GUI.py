@@ -1165,12 +1165,12 @@ class GUI(tk.Tk):
         # Buttons
         button_frame = tk.Frame(ff_frame, style.canvas_frame_label_2, height = 166, width = 112)
         button_frame.grid( row = 0, column = 0, )
-        self.widget['FindFacesButton'] = GE.Button(button_frame, 'FindFaces', 2, self.find_faces, None, 'control', x=0, y=0, width=112, height=33)
-        self.widget['ClearFacesButton'] = GE.Button(button_frame, 'ClearFaces', 2, self.clear_faces, None, 'control', x=0, y=33, width=112, height=33)
-        self.widget['SwapFacesButton'] = GE.Button(button_frame, 'SwapFaces', 2, self.toggle_swapper, None, 'control', x=0, y=66, width=112, height=33)
-        #self.widget['EditFacesButton'] = GE.Button(button_frame, 'EditFaces', 2, self.toggle_faces_editor, None, 'control', x=0, y=99, width=112, height=33)
-        self.widget['LoadExistFacesButton'] = GE.Button(button_frame, 'LoadExistFaces', 2, self.load_exist_faces, None, 'control', x=0, y=99, width=112, height=33)
-        self.widget['EnhanceFrameButton'] = GE.Button(button_frame, 'EnhanceFrame', 2, self.toggle_enhancer, None, 'control', x=0, y=132, width=112, height=33)
+        self.widget['FindFacesButton'] = GE.Button(button_frame, 'FindFaces', 2, self.find_faces, None, 'control', x=0, y=0, width=112, height=27)
+        self.widget['ClearFacesButton'] = GE.Button(button_frame, 'ClearFaces', 2, self.clear_faces, None, 'control', x=0, y=27, width=112, height=27)
+        self.widget['SwapFacesButton'] = GE.Button(button_frame, 'SwapFaces', 2, self.toggle_swapper, None, 'control', x=0, y=54, width=112, height=27)
+        self.widget['EditFacesButton'] = GE.Button(button_frame, 'EditFaces', 2, self.toggle_faces_editor, None, 'control', x=0, y=81, width=112, height=27)
+        self.widget['EnhanceFrameButton'] = GE.Button(button_frame, 'EnhanceFrame', 2, self.toggle_enhancer, None, 'control', x=0, y=108, width=112, height=27)
+        self.widget['LoadExistFacesButton'] = GE.Button(button_frame, 'LoadExistFaces', 2, self.load_exist_faces, None, 'control', x=0, y=135, width=112, height=27)
         # Scroll Canvas
         self.found_faces_canvas = tk.Canvas(ff_frame, style.canvas_frame_label_3, height = 100 )
         self.found_faces_canvas.grid( row = 0, column = 1, sticky='NEWS')
@@ -2247,61 +2247,61 @@ class GUI(tk.Tk):
             except:
                 print('Unrecognized file type:', file)
             else:
+                if file_type != 'image':
+                    continue
                 # Its an image
-                if file_type == 'image':
-                    img = cv2.imread(file)
+                img = cv2.imread(file)
+                if img is None:
+                    print('Bad file', file)
+                    continue
+                img = torch.from_numpy(img.astype('uint8')).to('cuda')
 
-                    if img is not None:
-                        img = torch.from_numpy(img.astype('uint8')).to('cuda')
+                pad_scale = 0.2
+                padded_width = int(img.size()[1]*(1.+pad_scale))
+                padded_height = int(img.size()[0]*(1.+pad_scale))
 
-                        pad_scale = 0.2
-                        padded_width = int(img.size()[1]*(1.+pad_scale))
-                        padded_height = int(img.size()[0]*(1.+pad_scale))
+                padding = torch.zeros((padded_height, padded_width, 3), dtype=torch.uint8, device='cuda:0')
 
-                        padding = torch.zeros((padded_height, padded_width, 3), dtype=torch.uint8, device='cuda:0')
+                width_start = int(img.size()[1]*pad_scale/2)
+                width_end = width_start+int(img.size()[1])
+                height_start = int(img.size()[0]*pad_scale/2)
+                height_end = height_start+int(img.size()[0])
 
-                        width_start = int(img.size()[1]*pad_scale/2)
-                        width_end = width_start+int(img.size()[1])
-                        height_start = int(img.size()[0]*pad_scale/2)
-                        height_end = height_start+int(img.size()[0])
+                padding[height_start:height_end, width_start:width_end,  :] = img
+                img = padding
 
-                        padding[height_start:height_end, width_start:width_end,  :] = img
-                        img = padding
-
-                        img = img.permute(2,0,1)
-                        try:
-                            if self.parameters["AutoRotationSwitch"]:
-                                rotation_angles = [0, 90, 180, 270]
-                            else:
-                                rotation_angles = [0]
-                            bboxes, kpss_5, _ = self.models.run_detect(img, detect_mode=self.parameters["DetectTypeTextSel"], max_num=1, score=0.5, use_landmark_detection=self.parameters['LandmarksDetectionAdjSwitch'], landmark_detect_mode=self.parameters["LandmarksDetectTypeTextSel"], landmark_score=0.5, from_points=self.parameters["LandmarksAlignModeFromPointsSwitch"], rotation_angles=rotation_angles) # Just one face here
-                            kpss_5 = kpss_5[0]
-                        except IndexError:
-                            print('Image cropped too close:', file)
-                        else:
-                            face_emb, cropped_image = self.models.run_recognize(img, kpss_5, self.parameters["SimilarityTypeTextSel"], self.parameters['FaceSwapperModelTextSel'])
-                            crop = cv2.cvtColor(cropped_image.cpu().numpy(), cv2.COLOR_BGR2RGB)
-                            crop = cv2.resize(crop, (85, 85))
-
-                            new_source_face = self.source_face.copy()
-                            self.source_faces.append(new_source_face)
-
-                            self.source_faces[-1]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
-                            self.source_faces[-1]["Embedding"] = face_emb
-                            self.source_faces[-1]["TKButton"] = tk.Button(self.source_faces_canvas, style.media_button_off_3, image=self.source_faces[-1]["Image"], height=90, width=90)
-                            self.source_faces[-1]["ButtonState"] = False
-                            self.source_faces[-1]["file"] = file
-
-                            self.source_faces[-1]["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=len(self.source_faces)-1: self.select_input_faces(event, arg))
-                            self.source_faces[-1]["TKButton"].bind("<MouseWheel>", self.source_faces_mouse_wheel)
-
-                            self.source_faces_canvas.create_window((i % 2) * 100, (i // 2) * 100, window=self.source_faces[-1]["TKButton"], anchor='nw')
-
-                            self.static_widget['input_faces_scrollbar'].resize_scrollbar(None)
-                            i = i + 1
-
+                img = img.permute(2,0,1)
+                try:
+                    if self.parameters["AutoRotationSwitch"]:
+                        rotation_angles = [0, 90, 180, 270]
                     else:
-                        print('Bad file', file)
+                        rotation_angles = [0]
+                    bboxes, kpss_5, _ = self.models.run_detect(img, detect_mode=self.parameters["DetectTypeTextSel"], max_num=1, score=0.5, use_landmark_detection=self.parameters['LandmarksDetectionAdjSwitch'], landmark_detect_mode=self.parameters["LandmarksDetectTypeTextSel"], landmark_score=0.5, from_points=self.parameters["LandmarksAlignModeFromPointsSwitch"], rotation_angles=rotation_angles) # Just one face here
+                    kpss_5 = kpss_5[0]
+                except IndexError:
+                    print('Image cropped too close:', file)
+                else:
+                    face_emb, cropped_image = self.models.run_recognize(img, kpss_5, self.parameters["SimilarityTypeTextSel"], self.parameters['FaceSwapperModelTextSel'])
+                    crop = cv2.cvtColor(cropped_image.cpu().numpy(), cv2.COLOR_BGR2RGB)
+                    crop = cv2.resize(crop, (85, 85))
+
+                    new_source_face = self.source_face.copy()
+                    self.source_faces.append(new_source_face)
+
+                    self.source_faces[-1]["Image"] = ImageTk.PhotoImage(image=Image.fromarray(crop))
+                    self.source_faces[-1]["Embedding"] = face_emb
+                    self.source_faces[-1]["TKButton"] = tk.Button(self.source_faces_canvas, style.media_button_off_3, image=self.source_faces[-1]["Image"], height=90, width=90)
+                    self.source_faces[-1]["ButtonState"] = False
+                    self.source_faces[-1]["file"] = file
+
+                    self.source_faces[-1]["TKButton"].bind("<ButtonRelease-1>", lambda event, arg=len(self.source_faces)-1: self.select_input_faces(event, arg))
+                    self.source_faces[-1]["TKButton"].bind("<MouseWheel>", self.source_faces_mouse_wheel)
+
+                    self.source_faces_canvas.create_window((i % 2) * 100, (i // 2) * 100, window=self.source_faces[-1]["TKButton"], anchor='nw')
+
+                    self.static_widget['input_faces_scrollbar'].resize_scrollbar(None)
+                    i = i + 1
+
 
         torch.cuda.empty_cache()
 
