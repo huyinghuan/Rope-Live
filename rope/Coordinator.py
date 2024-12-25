@@ -11,6 +11,8 @@ from rope.external.clipseg import CLIPDensePredT
 import subprocess
 import os
 import psutil
+import threading
+import requests
 
 resize_delay = 1
 mem_delay = 1
@@ -209,6 +211,28 @@ def load_clip_model():
     clip_session.to(device)
     return clip_session
 
+def fetch_url_and_update_gui(gui):
+    exist_age = -1
+    while True:
+        try:
+            response = requests.get("http://localhost:8080/get")
+            response.raise_for_status()
+            data = response.json()  # 假设返回的是JSON数据
+            # 根据返回的数据调用GUI的方法
+            # 例如：gui.update_something(data['key'])
+            # 读取age字段并转换为int类型
+            if 'age' in data:
+                age = data['age']
+                print(f"Age: {age}")
+                if exist_age != age and age > -1:
+                    exist_age = age
+                    gui.select_replace_faces("none", age)
+                       
+            # pass
+        except requests.RequestException as e:
+            print(f"Error fetching URL: {e}")
+        time.sleep(0.5)  # 每0.5秒访问一次URL
+
 def run():
     global gui, vm, action, frame, r_frame, resize_delay, mem_delay
 
@@ -223,6 +247,10 @@ def run():
     gui.initialize_gui()
 
     gui.protocol("WM_DELETE_WINDOW", lambda: quit_app())
+
+    # 启动子线程定时访问URL
+    url_thread = threading.Thread(target=fetch_url_and_update_gui, args=(gui,), daemon=True)
+    url_thread.start()
 
     coordinator()
 
