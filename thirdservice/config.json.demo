@@ -4,5 +4,9 @@
         "apiKey":"",
         "secretKey":""
     },
-    "tencent":{}
+    "tencent":{
+        "SECRET_ID":"",
+        "SECRET_KEY":""
+    },
+    "age_list": [60,65,70,75,80]
 }

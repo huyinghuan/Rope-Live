@@ -1,8 +1,12 @@
+# -*- coding: utf-8 -*-
 from aip import AipFace
 import json
 import argparse
 import base64
 import os
+from tencentcloud.common import credential
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.ft.v20200304 import ft_client, models
 
 config = {}
 
@@ -10,7 +14,42 @@ config = {}
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
 
+def tencentChangeAge(image, name):
 
+    # 为了保护密钥安全，建议将密钥设置在环境变量中或者配置文件中，请参考本文凭证管理章节。
+    # 硬编码密钥到代码中有可能随代码泄露而暴露，有安全隐患，并不推荐。
+    # cred = credential.Credential("secretId", "secretKey")
+    txConf = config["tencent"]
+    cred = credential.Credential(
+        txConf["SECRET_ID"],
+        txConf["SECRET_KEY"])
+    
+    httpProfile = HttpProfile()
+    httpProfile.endpoint = "ft.tencentcloudapi.com"
+
+    # 实例化一个client选项，可选的，没有特殊需求可以跳过
+    clientProfile = ClientProfile()
+    clientProfile.httpProfile = httpProfile
+    # 实例化要请求产品的client对象,clientProfile是可选的
+    client = ft_client.FtClient(cred, "", clientProfile)
+
+    for i in config['age_list']:
+        # 实例化一个请求对象,每个接口都会对应一个request对象
+        req = models.ChangeAgePicRequest()
+        params = {
+            "Image": image,
+            "AgeInfos":{
+                "Age":i
+            }
+        }
+        req.from_json_string(json.dumps(params))
+
+        # 返回的resp是一个ChangeAgePicResponse的实例，与请求对象对应
+        resp = client.ChangeAgePic(req)
+        obj = json.loads(resp.to_json_string())
+        if 'Image' in obj:
+            with open("dist/"+ name + '/' + name + '_' + str(i) + '.jpg', 'wb') as f:
+                f.write(base64.b64decode(obj["Image"]))
 
 
 def baiduChangeAge(image, name):
@@ -20,8 +59,6 @@ def baiduChangeAge(image, name):
     SECRET_KEY = baiduConfig['secretKey']
     client = AipFace(APP_ID, API_KEY, SECRET_KEY)
     """ 调用人脸年龄识别 """
-    os.makedirs("dist/"+name, exist_ok=True)
- 
 
     # 调用人脸年龄识别
     for i in config['age_list']:
@@ -50,4 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('image', type=str, help='Path to the image file')
     parser.add_argument('--name', type=str, default='test', help='指定输出文件名,输出路径为name/name_$age.jpg')
     args = parser.parse_args()
+    
+    # 创建同名文件夹
+    os.makedirs("dist/"+name, exist_ok=True)
     baiduChangeAge(args.image, args.name)
