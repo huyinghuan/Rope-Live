@@ -26,3 +26,4 @@ dependencies/
 Rope_TensorRT*.bat
 unins000.dat
 unins000.exe
+*.exe

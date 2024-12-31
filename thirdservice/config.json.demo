@@ -1,0 +1,8 @@
+{
+    "baidu":{
+        "appId":"",
+        "apiKey":"",
+        "secretKey":""
+    },
+    "tencent":{}
+}
