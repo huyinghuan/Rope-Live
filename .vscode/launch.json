@@ -13,6 +13,21 @@
             "args": [
             ],
             "python": "${command:python.interpreterPath}",
+
+        },
+        {
+            "name": "Age",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/thirdservice/Age.py",
+            "console": "integratedTerminal",
+            "python": "C:/Users/t/miniconda3/envs/Rope/python.exe",
+            "cwd": "${workspaceFolder}/thirdservice",
+            "args": [
+                "source/wenlan.jpg",
+                "--name",
+                "wenlan-tx"
+            ]
         }
     ]
 }

@@ -1,0 +1,1 @@
+ffmpeg.exe -hwaccel cuda -i wukequn.mov -c:v h264_nvenc wukequn.mp4
