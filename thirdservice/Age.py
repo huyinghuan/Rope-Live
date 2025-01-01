@@ -7,7 +7,8 @@ import os
 from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.ft.v20200304 import ft_client, models
-
+from tencentcloud.common.profile.client_profile import ClientProfile
+from tencentcloud.common.profile.http_profile import HttpProfile
 config = {}
 
 # 读取config.json文件
@@ -26,30 +27,32 @@ def tencentChangeAge(image, name):
     
     httpProfile = HttpProfile()
     httpProfile.endpoint = "ft.tencentcloudapi.com"
+    
 
     # 实例化一个client选项，可选的，没有特殊需求可以跳过
     clientProfile = ClientProfile()
     clientProfile.httpProfile = httpProfile
     # 实例化要请求产品的client对象,clientProfile是可选的
-    client = ft_client.FtClient(cred, "", clientProfile)
+    client = ft_client.FtClient(cred, "ap-guangzhou", clientProfile)
 
     for i in config['age_list']:
         # 实例化一个请求对象,每个接口都会对应一个request对象
         req = models.ChangeAgePicRequest()
-        params = {
-            "Image": image,
-            "AgeInfos":{
-                "Age":i
+        with open(image, 'rb') as f:
+            image_data = f.read()
+            image_base64 = base64.b64encode(image_data).decode('utf-8')
+            params = {
+                "Image": image_base64,
+                "AgeInfos":[{
+                    "Age": i
+                }]
             }
-        }
-        req.from_json_string(json.dumps(params))
-
-        # 返回的resp是一个ChangeAgePicResponse的实例，与请求对象对应
-        resp = client.ChangeAgePic(req)
-        obj = json.loads(resp.to_json_string())
-        if 'Image' in obj:
-            with open("dist/"+ name + '/' + name + '_' + str(i) + '.jpg', 'wb') as f:
-                f.write(base64.b64decode(obj["Image"]))
+            req.from_json_string(json.dumps(params))
+            # 返回的resp是一个ChangeAgePicResponse的实例，与请求对象对应
+            resp = client.ChangeAgePic(req)
+            if hasattr(resp,'ResultImage'):
+                with open("dist/"+ name + '/' + name + '_' + str(i) + '.jpg', 'wb') as f:
+                    f.write(base64.b64decode(resp.ResultImage))
 
 
 def baiduChangeAge(image, name):
@@ -68,12 +71,11 @@ def baiduChangeAge(image, name):
             image_data = f.read()
             image_base64 = base64.b64encode(image_data).decode('utf-8')
             try:
+                # TO_OLD V2_AGE
                 response = client.faceSkinSmoothV1(image=image_base64, image_type="BASE64", action_type="V2_AGE", options=options)
                 if 'error_code' in response:
                     if response['error_code'] == 0:
                         image_change = response["result"]['image']
-                        # 创建同名文件夹
-                        # 创建同名文件夹
                         with open("dist/"+ name + '/' + name + '_' + str(i) + '.jpg', 'wb') as f:
                             f.write(base64.b64decode(image_change))
             except Exception as e:
@@ -89,5 +91,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     # 创建同名文件夹
-    os.makedirs("dist/"+name, exist_ok=True)
-    baiduChangeAge(args.image, args.name)
+    os.makedirs("dist/"+args.name, exist_ok=True)
+    #baiduChangeAge(args.image, args.name)
+    tencentChangeAge(args.image, args.name)
