@@ -51,7 +51,7 @@ def tencentChangeAge(image, name):
             # 返回的resp是一个ChangeAgePicResponse的实例，与请求对象对应
             resp = client.ChangeAgePic(req)
             if hasattr(resp,'ResultImage'):
-                with open("dist/"+ name + '/' + name + '_' + str(i) + '.jpg', 'wb') as f:
+                with open("dist/"+ name + '/' + name + '_' + str(i) + '-tx.jpg', 'wb') as f:
                     f.write(base64.b64decode(resp.ResultImage))
 
 
@@ -72,7 +72,7 @@ def baiduChangeAge(image, name):
             image_base64 = base64.b64encode(image_data).decode('utf-8')
             try:
                 # TO_OLD V2_AGE
-                response = client.faceSkinSmoothV1(image=image_base64, image_type="BASE64", action_type="V2_AGE", options=options)
+                response = client.faceSkinSmoothV1(image=image_base64, image_type="BASE64", action_type="TO_OLD", options=options)
                 if 'error_code' in response:
                     if response['error_code'] == 0:
                         image_change = response["result"]['image']
