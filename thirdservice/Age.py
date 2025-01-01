@@ -62,7 +62,6 @@ def baiduChangeAge(image, name):
     SECRET_KEY = baiduConfig['secretKey']
     client = AipFace(APP_ID, API_KEY, SECRET_KEY)
     """ 调用人脸年龄识别 """
-
     # 调用人脸年龄识别
     for i in config['age_list']:
         options = {}
@@ -90,7 +89,19 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='test', help='指定输出文件名,输出路径为name/name_$age.jpg')
     args = parser.parse_args()
     
-    # 创建同名文件夹
-    os.makedirs("dist/"+args.name, exist_ok=True)
-    #baiduChangeAge(args.image, args.name)
-    tencentChangeAge(args.image, args.name)
+    # 判断路径是否为文件夹
+    if os.path.isdir(args.image):
+        # 遍历文件夹下所有文件
+        for root, dirs, files in os.walk(args.image):
+            for file in files:
+                image = os.path.join(root, file)
+                # 获取文件名
+                name = os.path.splitext(file)[0]
+                # 创建同名文件夹
+                os.makedirs("dist/"+name, exist_ok=True)
+                tencentChangeAge(image, name)
+    else:
+        # 创建同名文件夹
+        os.makedirs("dist/"+args.name, exist_ok=True)
+        #baiduChangeAge(args.image, args.name)
+        tencentChangeAge(args.image, args.name)
