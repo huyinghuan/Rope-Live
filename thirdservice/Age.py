@@ -9,11 +9,37 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentClo
 from tencentcloud.ft.v20200304 import ft_client, models
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
+from volcengine.visual.VisualService import VisualService
+import time
+
 config = {}
 
 # 读取config.json文件
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
+
+def huoshanChangeAge(image, name):
+    huoshanConfig = config["huoshan"]
+    service = VisualService()
+    service.set_ak(huoshanConfig['ak'])
+    service.set_sk(huoshanConfig['sk'])
+    with open(image, 'rb') as f:
+        image_data = f.read()
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        for i in config['age_list']:
+            if i > 70:
+                continue
+            form = {
+                "req_key": "all_age_generation",
+                "target_age": i,
+                "binary_data_base64": [image_base64],
+            }
+            resp = service.all_age_generation(form)
+            if resp['code'] == 10000:
+                image_change = resp['data']['binary_data_base64'][0]
+                with open("dist/"+ name + '/' + name + '_' + str(i) + '-hs.jpg', 'wb') as f:
+                    f.write(base64.b64decode(image_change))
+            time.sleep(1)  
 
 def tencentChangeAge(image, name):
 
@@ -103,9 +129,11 @@ if __name__ == '__main__':
                 # 创建同名文件夹
                 os.makedirs("dist/"+name, exist_ok=True)
                 #tencentChangeAge(image, name)
-                baiduChangeAge(image, name)
+                #baiduChangeAge(image, name)
+                huoshanChangeAge(image, name)
     else:
         # 创建同名文件夹
         os.makedirs("dist/"+args.name, exist_ok=True)
-        baiduChangeAge(args.image, args.name)
-        tencentChangeAge(args.image, args.name)
+        #baiduChangeAge(args.image, args.name)
+        #tencentChangeAge(args.image, args.name)
+        huoshanChangeAge(args.image, args.name)
