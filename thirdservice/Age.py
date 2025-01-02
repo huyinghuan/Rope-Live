@@ -71,7 +71,7 @@ def baiduChangeAge(image, name):
             image_base64 = base64.b64encode(image_data).decode('utf-8')
             try:
                 # TO_OLD V2_AGE
-                response = client.faceSkinSmoothV1(image=image_base64, image_type="BASE64", action_type="TO_OLD", options=options)
+                response = client.faceSkinSmoothV1(image=image_base64, image_type="BASE64", action_type="V2_AGE", options=options)
                 if 'error_code' in response:
                     if response['error_code'] == 0:
                         image_change = response["result"]['image']
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                     continue
                 # 创建同名文件夹
                 os.makedirs("dist/"+name, exist_ok=True)
-                tencentChangeAge(image, name)
+                #tencentChangeAge(image, name)
                 baiduChangeAge(image, name)
     else:
         # 创建同名文件夹

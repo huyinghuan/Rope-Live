@@ -17,6 +17,7 @@ import requests
 resize_delay = 1
 mem_delay = 1
 
+
 def quit_app():
     vm.terminate_audio_process_tree()
     gui.destroy()
@@ -211,8 +212,9 @@ def load_clip_model():
     clip_session.to(device)
     return clip_session
 
+open = False
 def fetch_url_and_update_gui(gui):
-    exist_age = -1
+    global open
     while True:
         try:
             response = requests.get("http://localhost:8080/get")
@@ -221,13 +223,13 @@ def fetch_url_and_update_gui(gui):
             # 根据返回的数据调用GUI的方法
             # 例如：gui.update_something(data['key'])
             # 读取age字段并转换为int类型
-            if 'age' in data:
-                age = data['age']
-                print(f"Age: {age}")
-                if exist_age != age and age > -1:
-                    exist_age = age
-                    gui.select_replace_faces("none", age)
-                       
+            if 'open' in data:
+                swap = data['open']
+                print(f"open: {swap}")
+                if open != swap:
+                    open = swap
+                    #gui.select_replace_faces("none", age)
+                    gui.toggle_swapper(swap)
             # pass
         except requests.RequestException as e:
             print(f"Error fetching URL: {e}")

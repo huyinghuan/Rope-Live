@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 import json  # 添加导入json模块
 
-stored_data = {"age": -1}  # 定义全局变量并设置默认值
+stored_data = {"open": False}  # 定义全局变量并设置默认值
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
