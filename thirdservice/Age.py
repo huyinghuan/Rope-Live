@@ -97,11 +97,15 @@ if __name__ == '__main__':
                 image = os.path.join(root, file)
                 # 获取文件名
                 name = os.path.splitext(file)[0]
+                ext = os.path.splitext(file)[1]
+                if ext != '.jpg' and ext != '.png':
+                    continue
                 # 创建同名文件夹
                 os.makedirs("dist/"+name, exist_ok=True)
                 tencentChangeAge(image, name)
+                baiduChangeAge(image, name)
     else:
         # 创建同名文件夹
         os.makedirs("dist/"+args.name, exist_ok=True)
-        #baiduChangeAge(args.image, args.name)
+        baiduChangeAge(args.image, args.name)
         tencentChangeAge(args.image, args.name)
