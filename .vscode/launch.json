@@ -21,12 +21,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/thirdservice/Age.py",
             "console": "integratedTerminal",
-            "python": "C:/Users/t/miniconda3/envs/Rope/python.exe",
+            "python": "${command:python.interpreterPath}",
             "cwd": "${workspaceFolder}/thirdservice",
             "args": [
-                "source/wenlan.jpg",
-                "--name",
-                "wenlan-tx"
+                "source",
             ]
         }
     ]
