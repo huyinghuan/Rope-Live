@@ -2538,10 +2538,10 @@ class GUI(tk.Tk):
             found = False
 
             # Check if this face has already been found
-            for emb in self.target_faces:
-                if self.findCosineDistance(emb['Embedding'], face[1]) >= threshhold:
-                    found = True
-                    break
+            # for emb in self.target_faces:
+            #     if self.findCosineDistance(emb['Embedding'], face[1]) >= threshhold:
+            #         found = True
+            #         break
 
             # If we dont find any existing simularities, it means that this is a new face and should be added to our found faces
             if not found:
